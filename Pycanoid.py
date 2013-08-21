@@ -5,7 +5,66 @@ import pygame
 import time
 import math
 import random
+#import pickle
+import yaml
+import os
+
+
 pygame.init()
+
+def comunication_init(parameters):
+# Místo pro inicializaci síťové komunikace
+# Asi by se zde mělo rozhodovat, kdo bude player1 a kdo bude player2
+    comunication_parameters = None
+    return comunication_parameters
+
+def comunication_loop(game_state, comunication_parameters):
+# Tato funkce je volána v každé smyčce aplikace. 
+    return game_state
+
+    pass
+
+
+def get_parameters():
+    """
+    Funkce obstará základní parametry
+    """
+    config_file = 'pycanoid.config'
+    if os.path.isfile(config_file):
+        stream = file(config_file, 'r')    # 'document.yaml' contains a single YAML document.
+        parameters = yaml.load(stream)
+    else:
+        parameters = {
+                'ip_server':'192.168.1.5', 
+                'host':True,
+                'nplayers':2,
+                }
+        with open(config_file, 'wb') as f:
+            yaml.dump(parameters, f)
+
+    return parameters
+
+
+def mux_game_state(deska1, deska2, ball):
+    gs = {
+            'player1':{'x':deska1.x, 'y':deska1.y, 'z':0, 'name':'Jednicka'},
+            'player2':{'x':deska2.x, 'y':deska2.y, 'z':0, 'name':'Dvojka'},
+            'ball':{'x':ball.x,'y':ball.y},
+            'gamefield':{'zatim':'nic'}
+            }
+
+    return gs
+
+def demux_game_state(gs, deska1, deska2, ball):
+    deska1.x = gs['player1']['x']
+    deska1.y = gs['player1']['y']
+    deska2.x = gs['player2']['x']
+    deska2.y = gs['player2']['y']
+
+    ball.x = gs['ball']['x']
+    ball.y = gs['ball']['y']
+    return deska1, deska2, ball
+
 
 
 # Třída pro herní desku
@@ -29,7 +88,7 @@ class BALL:
     speed = 500
     size = (20, 20)
 
-    def move(self, dt):
+    def move(self, dt ):
         dx = math.cos(self.uhel) * self.speed * dt   # Výpočet příštích souřadnic x,y
         dy = math.sin(self.uhel) * self.speed * dt
 
@@ -89,28 +148,35 @@ Tvoří základní pozadí, vše co je vidět
     obrazovka.blit(pozadi, (0, 0))
 
 
-def DrawDesk(position):
+def DrawDesk(position, ddeska, ndeska = 0):
     """
 Kontrola spravneho umisteni odrazeci desky
 :param position:
+    deska: objekt desky
+    ndeska: 0 - dole, 1 - nahore
 """
+    if ndeska == 0:
+        deskay = herni_velikost[1] - ddeska.size[1]
+    else:
+        deskay = 30 # herni_velikost[1] - ddeska.size[1] - 30
+
     # podminka pro herni oblast
-    if (position[0] - deska.size[0] / 2 >= spodni_levy[0]) and (position[0] + deska.size[0] / 2 <= spodni_pravy[0]):
-        deska.x = position[0] - deska.size[0] / 2
-        deska.y = herni_velikost[1] - deska.size[1]
-        obrazovka.blit(deska_surface, (deska.x, deska.y))
+    if (position[0] - ddeska.size[0] / 2 >= spodni_levy[0]) and (position[0] + ddeska.size[0] / 2 <= spodni_pravy[0]):
+        ddeska.x = position[0] - ddeska.size[0] / 2
+        ddeska.y = deskay
+        obrazovka.blit(deska_surface, (ddeska.x, ddeska.y))
 
     # oblast nalevo od herni plochy
     elif position[0] - deska.size[0] / 2 <= spodni_levy[0]:
-        deska.x = spodni_levy[0]
-        deska.y = herni_velikost[1] - deska.size[1]
-        obrazovka.blit(deska_surface, (deska.x, deska.y))
+        ddeska.x = spodni_levy[0]
+        ddeska.y = deskay
+        obrazovka.blit(deska_surface, (ddeska.x, ddeska.y))
 
     # oblast napravo od herni plochy
     elif position[0] - deska.size[0] / 2 >= spodni_levy[0]:
-        deska.x = spodni_pravy[0] - deska.size[0]
-        deska.y = herni_velikost[1] - deska.size[1]
-        obrazovka.blit(deska_surface, (deska.x, deska.y))
+        ddeska.x = spodni_pravy[0] - ddeska.size[0]
+        ddeska.y = deskay
+        obrazovka.blit(deska_surface, (ddeska.x, ddeska.y))
 
 
 def DrawBallBegin():
@@ -129,10 +195,18 @@ def GenerateAngle():
     ball.stupen = - stupen
     ball.uhel = math.radians(- stupen)
 
+#def pycanoid():
 
+parameters = get_parameters()
+
+comunication_parameters = comunication_init(parameters)
 # Inicializace tříd
-deska = DESKA
+deska = DESKA()
+deska2 = None
 ball = BALL()
+if parameters['nplayers'] > 1:
+    deska2 = DESKA()
+    
 
 # BARVY
 bila = 250, 250, 250
@@ -168,6 +242,7 @@ pozadi.fill(cerna)
 deska_surface = pygame.Surface(deska.size)
 deska_surface.fill(bila)
 
+
 # Surface pro kuličku
 ball_surface = pygame.Surface(ball.size)
 ball_surface.fill(bila)
@@ -192,6 +267,9 @@ pygame.draw.line(pozadi, bila, horni_levy, spodni_levy)
 pygame.draw.line(pozadi, bila, horni_pravy, spodni_pravy)
 
 
+if parameters['nplayers'] > 1:
+    game_state = mux_game_state(deska, deska2, ball)
+
 pygame.display.update()
 
 
@@ -199,10 +277,14 @@ running = 1
 click = 0
 lives = 3
 
+
+
 while running:
         CreateBackground()
         m_pos = pygame.mouse.get_pos()    # aktuální pozice myši
-        DrawDesk(m_pos)
+        DrawDesk(m_pos, deska)
+        if parameters['nplayers'] > 1:
+            DrawDesk([game_state['player2']['x'], game_state['player2']['y']] , deska2, 1)
 
         # Začátek hry
         if click == 0:
@@ -226,5 +308,16 @@ while running:
                 prev_time = time.time()
                 actual_time = time.time()
 
+
+        # synchronizace po síti
+        if parameters['nplayers'] > 1:
+            game_state = mux_game_state(deska, deska2, ball)
+            game_state = comunication_loop(game_state, comunication_parameters)
+            deska, deska2, ball = demux_game_state(game_state, deska, deska2, ball)
+
         pygame.display.update()
         fpsClock.tick(FPS)
+
+
+#if __name__ == "__main__":
+#    pycanoid()
