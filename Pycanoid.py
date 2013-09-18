@@ -8,8 +8,16 @@ import random
 #import pickle
 import yaml
 import os
+import facecontrol
 
 
+defaut_parameters = {
+        'ip_server':'192.168.1.5', 
+        'host':True,
+        'nplayers':2,
+        'control1':'mouse',
+        'window_size':(1024,768)
+        }
 pygame.init()
 
 def comunication_init(parameters):
@@ -32,13 +40,10 @@ def get_parameters():
     config_file = 'pycanoid.config'
     if os.path.isfile(config_file):
         stream = file(config_file, 'r')    # 'document.yaml' contains a single YAML document.
-        parameters = yaml.load(stream)
+        parameters = defaut_parameters
+        parameters.update(yaml.load(stream))
     else:
-        parameters = {
-                'ip_server':'192.168.1.5', 
-                'host':True,
-                'nplayers':2,
-                }
+        parameters = defaut_parameters
         with open(config_file, 'wb') as f:
             yaml.dump(parameters, f)
 
@@ -215,7 +220,7 @@ zelena = 0, 250, 0
 modra = 0, 0, 250
 
 # Rozměry
-velikost_okna = (1024, 768)                                               # okno které se zobrazuje po spuštění
+velikost_okna = parameters['window_size']
 odsazeni = int(velikost_okna[0] / 6.8)
 odsazeni_dole = int(velikost_okna[1] / 13.6)
 herni_velikost = (velikost_okna[0] - (odsazeni * 2), velikost_okna[1] - odsazeni_dole)          # velikost plochy kde létá kulička
@@ -266,6 +271,8 @@ pygame.draw.line(pozadi, bila, spodni_levy, spodni_pravy)
 pygame.draw.line(pozadi, bila, horni_levy, spodni_levy)
 pygame.draw.line(pozadi, bila, horni_pravy, spodni_pravy)
 
+if parameters['control1'] == 'face':
+    fctrl = facecontrol.Facecontrol()
 
 if parameters['nplayers'] > 1:
     game_state = mux_game_state(deska, deska2, ball)
@@ -281,7 +288,10 @@ lives = 3
 
 while running:
         CreateBackground()
-        m_pos = pygame.mouse.get_pos()    # aktuální pozice myši
+        if parameters['control1'] == 'mouse':
+            m_pos = pygame.mouse.get_pos()    # aktuální pozice myši
+        elif parameters['control1'] == 'face':
+            m_pos = fctrl.get_pos()
         DrawDesk(m_pos, deska)
         if parameters['nplayers'] > 1:
             DrawDesk([game_state['player2']['x'], game_state['player2']['y']] , deska2, 1)
