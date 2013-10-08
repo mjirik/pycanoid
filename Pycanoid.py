@@ -202,6 +202,8 @@ def GenerateAngle():
 
 #def pycanoid():
 
+print "Deprecated interface file. New is pycanoidMain.py"
+
 parameters = get_parameters()
 
 comunication_parameters = comunication_init(parameters)
