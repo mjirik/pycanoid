@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import cv2
 
 class Facecontrol:
     """
@@ -11,7 +12,7 @@ class Facecontrol:
     def __init__(self):
 # default calibration_params
         self.calibration_params = 1
-        self.cam_source = 1      # 0 - default, 1 - external
+        self.cam_source = 0      # 0 - default, 1 - external
         self.cam = cv2.VideoCapture(self.cam_source)
         self.hc = cv2.CascadeClassifier("haarcascade_frontalface_alt2.xml")
         #cv2.resizeWindow("Webcam screen", 640, 480)

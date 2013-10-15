@@ -11,6 +11,7 @@ import os
 from pycanoidGameLogic import GameLogic
 from pycanoidGraphics import GameGraphics
 
+import facecontrol
 
 class Pycanoid:
     def __init__(self):
@@ -18,7 +19,7 @@ class Pycanoid:
                 'ip_server':'192.168.1.5', 
                 'host':True,
                 'nplayers':2,
-                'control1':'mouse',
+                'control1':'face',
                 'window_size': (1024,768)
                 }
 
