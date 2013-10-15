@@ -5,13 +5,27 @@ import time
 import math
 import random
 #import pickle
-import yaml
 import os
+import sys
 
 from pycanoidGameLogic import GameLogic
 from pycanoidGraphics import GameGraphics
 
 import facecontrol
+
+# version comparison
+from pkg_resources import parse_version
+
+if parse_version(sys.version) < parse_version('3.0'):
+    # python 2.7
+    import yaml
+else:
+    # python 3.0
+    import yaml
+    pass
+
+
+
 
 class Pycanoid:
     def __init__(self):
@@ -27,14 +41,23 @@ class Pycanoid:
         """
         Funkce obstará základní parametry
         """
-##    config_file = 'pycanoid.config'
-##    if os.path.isfile(config_file):
-##        stream = file(config_file, 'r')    # 'document.yaml' contains a single YAML document. # file() delal problemy na win 8 HOLI
-##        parameters = yaml.load(stream)
-##    else:
-        parameters = self.defaut_parameters
-##        with open(config_file, 'wb') as f:
-##            yaml.dump(parameters, f)
+        config_file = 'pycanoid.config'
+        if os.path.isfile(config_file):
+            stream = file(config_file, 'r')    # 'document.yaml' contains a single YAML document. # file() delal problemy na win 8 HOLI
+            if parse_version(sys.version) < parse_version('3.0'):
+#           python 27
+                parameters = yaml.load(stream)
+            else: # python 3
+                parameters = yaml.load(stream)
+        else:
+            parameters = self.defaut_parameters
+            if parse_version(sys.version) < parse_version('3.0'):
+#           python 27
+                with open(config_file, 'wb') as f:
+                    yaml.dump(parameters, f)
+            else: # python 3
+                with open(config_file, 'wb') as f:
+                    yaml.dump(parameters, f)
         return parameters
 
     def run(self):

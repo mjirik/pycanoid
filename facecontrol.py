@@ -80,7 +80,7 @@ class Facecontrol:
             positions = self.face_center(faces)
 
             position_pc = positions[0]
-            print 'Faces:', len(faces)
+            #print 'Faces:', len(faces)
 
 
 
