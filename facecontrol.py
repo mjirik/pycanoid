@@ -11,9 +11,11 @@ class Facecontrol:
     def __init__(self):
 # default calibration_params
         self.calibration_params = 1
-        self.cam_source = 1      # 0 - default, 1 - external
+        self.cam_source = 0      # 0 - default, 1 - external
         self.cam = cv2.VideoCapture(self.cam_source)
         self.hc = cv2.CascadeClassifier("haarcascade_frontalface_alt2.xml")
+        #self.minNeighbr = 4
+        #self.scaleFac = 1.4
         #self.okno = cv2.resizeWindow("Webcam screen", 640, 480)
 
     def get_image(self, cam):
@@ -25,7 +27,7 @@ class Facecontrol:
             print "Error: No input"
 
     def detect(self, img):
-        faces = self.hc.detectMultiScale(img)
+        faces = self.hc.detectMultiScale(img, scaleFactor = 1.5, minNeighbors = 4)
         for face in faces:
             cv2.rectangle(img, (face[0], face[1]), (face[0] + face[2], face[1] + face[3]), (255, 0, 0), 3)
         return faces
@@ -48,7 +50,8 @@ class Facecontrol:
         position_pc = [0, 0]
 
         if len(faces) > 0:
-            positions = self.face_center(faces)
+            #positions = self.face_center(faces)
+            positions = faces
             position_pc = positions[0]
 
         pos = self.__calibration(position_pc)
