@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import cv2
+import numpy as np
+
 
 class Facecontrol:
     """
@@ -9,33 +11,33 @@ class Facecontrol:
     """
     
     def __init__(self):
-# default calibration_params
+    # default calibration_params
         self.calibration_params = 1
-        self.cam_source = 0      # 0 - default, 1 - external
+        self.cam_source = 1       # 0 - default, 1 - external , vetsinou 0
         self.cam = cv2.VideoCapture(self.cam_source)
-        self.hc = cv2.CascadeClassifier("haarcascade_frontalface_alt2.xml")
-        #self.minNeighbr = 4
-        #self.scaleFac = 1.4
+        self.hc = cv2.CascadeClassifier("haarcascade_frontalface_alt2.xml")  # Classificator type
         #self.okno = cv2.resizeWindow("Webcam screen", 640, 480)
 
     def get_image(self, cam):
-        ret, img = cam.read()
+        ret, img = cam.read()   # ret = T/F getting screen
+        fimg = np.asarray(img)  # Array for mirror image
         if ret:
-            gimg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            return gimg
+            #gimg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) # Gray image
+            cv2.flip(img, 1, fimg)          # Mirror image
+            return fimg
         else:
             print "Error: No input"
 
     def detect(self, img):
-        faces = self.hc.detectMultiScale(img, scaleFactor = 1.5, minNeighbors = 4)
-        for face in faces:
-            cv2.rectangle(img, (face[0], face[1]), (face[0] + face[2], face[1] + face[3]), (255, 0, 0), 3)
+        faces = self.hc.detectMultiScale(img, scaleFactor = 1.6, minNeighbors = 6)  # Setting for smooth run
+        #for face in faces:
+         #   cv2.rectangle(img, (face[0], face[1]), (face[0] + face[2], face[1] + face[3]), (0, 255, 0), 1)
         return faces
 
     def face_center(self, faces):
         positions = []
         for face_pos in faces:
-            fpos = [face_pos[0] + (face_pos[2] / 2), face_pos[1] + (face_pos[3] / 2)]
+            fpos = [face_pos[0] + (face_pos[2] / 2), face_pos[1] + (face_pos[3] / 2)] # center face (nose)
             positions.append(fpos)
         return positions
 
@@ -50,11 +52,11 @@ class Facecontrol:
         position_pc = [0, 0]
 
         if len(faces) > 0:
-            #positions = self.face_center(faces)
-            positions = faces
+            positions = self.face_center(faces)
             position_pc = positions[0]
 
         pos = self.__calibration(position_pc)
+        cv2.circle(img, (position_pc[0], position_pc[1]), 10, (0, 255, 0), 5)
         cv2.imshow("Position", img)
         return pos
 

@@ -11,6 +11,7 @@ import sys
 from pycanoidGameLogic import GameLogic
 from pycanoidGraphics import GameGraphics
 
+from gamearea import Gamearea
 import facecontrol
 
 # version comparison
