@@ -7,6 +7,7 @@ from facecontrol import Facecontrol
 class Gamearea:
     '''
     Vymezi herni plochu. Vraci max levou a pravou stranu
+    TEST GITHUB...
     '''
 
     def __init__(self):
