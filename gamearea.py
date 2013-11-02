@@ -50,8 +50,9 @@ class Gamearea:
             return True
 
     def getarea(self):
+        setting = True
 
-        while True:
+        while setting:
             face_pos = self.fc.get_pos()    # Aktualni pozice ksichtu (x,y)
             self.setsides(face_pos)     # Vyhrazeni oblasti
 
@@ -61,6 +62,7 @@ class Gamearea:
                     print "Area created!"
                     cv2.destroyAllWindows()
                     self.saveparams(self.left, self.right, self.top, self.bottom)
+                    setting = False
                     break
                 else:
                     print "Error, running again"
