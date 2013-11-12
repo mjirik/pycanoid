@@ -5,7 +5,7 @@ import pygame
 import time
 import math
 import random
-#import pickle
+import pickle
 import os
 import sys
 
@@ -91,7 +91,12 @@ class Pycanoid:
 # Control
                 if parameters['control1'] == 'mouse':
                     m_pos = pygame.mouse.get_pos()    # aktuální pozice myši
-                elif parameters['control1'] == 'face':
+                elif parameters['control1'] == 'face':  # Face control
+                    f = open("area_params.ps",'rb')
+                    area = pickle.load(f)
+                    f.close()
+                    fctrl.set_calibration_params(area)
+
                     m_pos = fctrl.get_pos()
 # Graphics
                 graphics.DrawDesk(m_pos, game.paddle1, 0)

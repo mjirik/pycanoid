@@ -47,9 +47,10 @@ class Facecontrol:
 
     def get_pos(self):
         img = self.get_image(self.cam)
+
         faces = self.detect(img)
 
-        position_pc = [0, 0]
+        position_pc = [0, 0]  # X,Y prvniho obliceje
 
         if len(faces) > 0:
             positions = self.face_center(faces)
@@ -61,10 +62,18 @@ class Facecontrol:
         return pos
 
     def set_calibration_params(self, calibration_params):
-        self.calibration_params = calibration_params
-        pass
+        area = calibration_params
+        x1 = area['left']
+        x2 = area['right']
+        y1 = area['top']
+        y2 = area['bottom']
+        l = x2 - x1
+
+
+
+
 
     def __calibration(self, position_precalibration):
-# do some magic with self.calibration_params
         position = position_precalibration
+
         return position

@@ -83,6 +83,3 @@ class Gamearea:
 if __name__ == '__main__':
     ar = Gamearea()
     ar.getarea()
-    file = open('area_params.ps', 'rb')
-    obj = pickle.load(file)
-    print obj
