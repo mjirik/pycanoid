@@ -45,7 +45,7 @@ class Facecontrol:
     def get_pos(self):
         img = self.get_image(self.cam)
         faces = self.detect(img)
-        position_pc = (0, 0)
+        position_pc = [0, 0]
 
         if len(faces) > 0:
             positions = self.face_center(faces)
@@ -53,7 +53,9 @@ class Facecontrol:
 
         pos = self.__calibration(position_pc) # Prepocitana kalibrace
         cv2.circle(img, (position_pc[0], position_pc[1]), 10, (0, 255, 0), 5)
-        cv2.imshow("Position", img)
+        fimg = np.asarray(img)
+        cv2.flip(img, 1, fimg)
+        cv2.imshow("Position", fimg)
         return pos
 
     def set_calibration_params(self, calibration_params):
@@ -63,7 +65,7 @@ class Facecontrol:
         position = position_precalibration[0]
 
         if self.area is None:
-            return position
+            return position_precalibration
         else:
             x1 = self.area['left']
             x2 = self.area['right']

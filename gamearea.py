@@ -18,7 +18,9 @@ class Gamearea:
         self.right = None
         self.top = None
         self.bottom = None
-        print "For LEFT border press 4, for RIGHT border press 6"
+        print "MIRRORED"
+        print "For LEFT border press 6, for RIGHT border press 4"
+        print "For TOP border press 8, for RIGHT border press 2"
 
     def setsides(self, face_pos):
 
@@ -53,7 +55,7 @@ class Gamearea:
         setting = True
 
         while setting:
-            face_pos = self.fc.get_pos()    # Aktualni pozice ksichtu (x,y)
+            face_pos = self.fc.get_pos()    # Aktualni pozice obliceje(x,y)
             self.setsides(face_pos)     # Vyhrazeni oblasti
 
             if cv2.waitKey(10) == 27:      # ESC

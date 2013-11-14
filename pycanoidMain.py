@@ -93,13 +93,18 @@ class Pycanoid:
                     m_pos = pygame.mouse.get_pos()    # aktuální pozice myši
                 elif parameters['control1'] == 'face':  # Face control
                     # Loading game area parameters
-                    f = open("area_params.ps",'rb')
-                    area = pickle.load(f)
-                    f.close()
-                    # Setting parameters
-                    fctrl.set_calibration_params(area)
-                    # Calibrated position
-                    m_pos = ((fctrl.get_pos()[0] * self.defaut_parameters['window_size'][0]), (fctrl.get_pos()[1] * self.defaut_parameters['window_size'][1]))
+                    if os.path.exists("area_params.ps"):
+                        f = open("area_params.ps",'rb')
+                        area = pickle.load(f)
+                        f.close()
+
+                        # Setting parameters
+                        fctrl.set_calibration_params(area)
+                        # Calibrated position
+                        m_pos = ((fctrl.get_pos()[0] * self.defaut_parameters['window_size'][0]), (fctrl.get_pos()[1] * self.defaut_parameters['window_size'][1]))
+                    else:
+                        print "Run camera calibration first"
+                        break
 # Graphics
                 graphics.DrawDesk(m_pos, game.paddle1, 0)
                 if parameters['nplayers'] == 2:
