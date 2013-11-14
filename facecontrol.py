@@ -16,22 +16,19 @@ class Facecontrol:
         self.cam_source = 0       # 0 - default, 1 - external , vetsinou 0
         self.cam = cv2.VideoCapture(self.cam_source)
         self.hc = cv2.CascadeClassifier("haarcascade_frontalface_alt2.xml")  # Classificator type
-        #self.okno = cv2.resizeWindow("Webcam screen", 640, 480)
+        self.area = None
 
     def get_image(self, cam):
         ret, img = cam.read()   # ret = T/F getting screen
-        fimg = np.asarray(img)  # Array for mirror image
+        #fimg = np.asarray(img)  # Array for mirror image
         if ret:
-            #gimg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) # Gray image
-            cv2.flip(img, 1, fimg)          # Mirror image
-            return fimg
+            #cv2.flip(img, 1, fimg)          # Mirror image
+            return img
         else:
             print "Error: No input"
 
     def detect(self, img):
         faces = self.hc.detectMultiScale(img, scaleFactor = 1.6, minNeighbors = 6)  # Setting for smooth run
-        #for face in faces:
-         #   cv2.rectangle(img, (face[0], face[1]), (face[0] + face[2], face[1] + face[3]), (0, 255, 0), 1)
         return faces
 
     def face_center(self, faces):
@@ -47,34 +44,40 @@ class Facecontrol:
 
     def get_pos(self):
         img = self.get_image(self.cam)
-
         faces = self.detect(img)
-
-        position_pc = [0, 0]  # X,Y prvniho obliceje
+        position_pc = (0, 0)
 
         if len(faces) > 0:
             positions = self.face_center(faces)
-            position_pc = positions[0]
+            position_pc = positions[0]  # X, Y prvniho obliceje
 
-        pos = self.calibration(position_pc)
+        pos = self.__calibration(position_pc) # Prepocitana kalibrace
         cv2.circle(img, (position_pc[0], position_pc[1]), 10, (0, 255, 0), 5)
         cv2.imshow("Position", img)
         return pos
 
     def set_calibration_params(self, calibration_params):
-        area = calibration_params
-        x1 = area['left']
-        x2 = area['right']
-        y1 = area['top']
-        y2 = area['bottom']
-        delka = x2 - x1
-
-
-
-
+        self.area = calibration_params
 
     def __calibration(self, position_precalibration):
-        position = position_precalibration
+        position = position_precalibration[0]
 
+        if self.area is None:
+            return position
+        else:
+            x1 = self.area['left']
+            x2 = self.area['right']
+            y1 = self.area['top']
+            y2 = self.area['bottom']
+            delka = x2 - x1
 
-        return position
+            if position >= x2:
+                new_pos = (1, position_precalibration[1])
+                return new_pos
+            elif position <= x1:
+                new_pos = (0, position_precalibration[1])
+                return new_pos
+            elif position > x1 and position < x2:
+                pos_delka = x2 - position
+                new_pos = (float(pos_delka)/delka, position_precalibration[1])
+                return new_pos
