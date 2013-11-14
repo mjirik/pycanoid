@@ -13,7 +13,7 @@ class Facecontrol:
     def __init__(self):
     # default calibration_params
         self.calibration_params = 1
-        self.cam_source = 1       # 0 - default, 1 - external , vetsinou 0
+        self.cam_source = 0       # 0 - default, 1 - external , vetsinou 0
         self.cam = cv2.VideoCapture(self.cam_source)
         self.hc = cv2.CascadeClassifier("haarcascade_frontalface_alt2.xml")  # Classificator type
         #self.okno = cv2.resizeWindow("Webcam screen", 640, 480)
@@ -56,7 +56,7 @@ class Facecontrol:
             positions = self.face_center(faces)
             position_pc = positions[0]
 
-        pos = self.__calibration(position_pc)
+        pos = self.calibration(position_pc)
         cv2.circle(img, (position_pc[0], position_pc[1]), 10, (0, 255, 0), 5)
         cv2.imshow("Position", img)
         return pos
@@ -67,7 +67,7 @@ class Facecontrol:
         x2 = area['right']
         y1 = area['top']
         y2 = area['bottom']
-        l = x2 - x1
+        delka = x2 - x1
 
 
 
@@ -75,5 +75,6 @@ class Facecontrol:
 
     def __calibration(self, position_precalibration):
         position = position_precalibration
+
 
         return position
