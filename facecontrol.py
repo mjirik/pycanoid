@@ -28,7 +28,7 @@ class Facecontrol:
             print "Error: No input"
 
     def detect(self, img):
-        faces = self.hc.detectMultiScale(img, scaleFactor = 1.6, minNeighbors = 6)  # Setting for smooth run
+        faces = self.hc.detectMultiScale(img, scaleFactor = 1.6, minNeighbors = 6, minSize = (100, 100), maxSize = (140, 140))  # Setting for smooth run
         return faces
 
     def face_center(self, faces):
