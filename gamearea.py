@@ -19,12 +19,12 @@ class Gamearea:
         self.top = None
         self.bottom = None
         print "MIRRORED"
-        print "For LEFT border press 6, for RIGHT border press 4"
+        print "For LEFT border press 4, for RIGHT border press 6"
         print "For TOP border press 8, for RIGHT border press 2"
 
     def setsides(self, face_pos):
 
-        if cv2.waitKey(10) == 56 and face_pos[0] != 0:      # TOP BORDER
+        if cv2.waitKey(10) == 56 and face_pos[1] != 0:      # TOP BORDER
             self.top = face_pos[1]
             print "Top side set on: "
             print self.top
@@ -34,22 +34,22 @@ class Gamearea:
             print "Bottom side set on: "
             print self.bottom
             time.sleep(1)
-        elif cv2.waitKey(10) == 52 and face_pos[0] != 0:    # LEFT BORDER
+        elif cv2.waitKey(10) == 54 and face_pos[0] != 0:    # LEFT BORDER 52
             self.left = face_pos[0]
-            print "Left side set on: "
+            print "Right side set on: "
             print self.left
             time.sleep(1)
-        elif cv2.waitKey(10) == 54 and face_pos[1] != 0:    # RIGHT BORDER
+        elif cv2.waitKey(10) == 52 and face_pos[0] != 0:    # RIGHT BORDER 54
             self.right = face_pos[0]
-            print "Right side set on: "
+            print "Left side set on: "
             print self.right
             time.sleep(1)
 
     def check(self):
-        if (self.left >= self.right) and (self.top >= self.bottom):
-            return False
-        else:
+        if (self.left <= self.right) and (self.top <= self.bottom):
             return True
+        else:
+            return False
 
     def getarea(self):
         setting = True
@@ -78,6 +78,7 @@ class Gamearea:
     def saveparams(self, left, right, top, bottom):
         f = open("area_params.ps", 'wb')
         dim = {'left': left, 'right': right, 'top': top, 'bottom': bottom}
+        print dim
         pickle.dump(dim, f)
         f.close()
 
