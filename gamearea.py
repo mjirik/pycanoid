@@ -18,9 +18,6 @@ class Gamearea:
         self.right = None
         self.top = None
         self.bottom = None
-        print "MIRRORED"
-        print "For LEFT border press 4, for RIGHT border press 6"
-        print "For TOP border press 8, for RIGHT border press 2"
 
     def setsides(self, face_pos):
 
