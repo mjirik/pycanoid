@@ -11,7 +11,7 @@ import os
 
 class GameGraphics:
     def __init__(self,game,velikost_okna = (1024, 768)):
-        
+
         self.game = game
         self.velikost_okna = velikost_okna
         # BARVY
@@ -23,7 +23,7 @@ class GameGraphics:
         # Rozměry
         self.odsazeni = int(self.velikost_okna[0] / 6.8)
         self.odsazeni_dole = int(self.velikost_okna[1] / 13.6)
-        self.herni_velikost = (self.velikost_okna[0] - (self.odsazeni * 2), self.velikost_okna[1] - self.odsazeni_dole) # velikost plochy kde létá kulička 
+        self.herni_velikost = (self.velikost_okna[0] - (self.odsazeni * 2), self.velikost_okna[1] - self.odsazeni_dole) # velikost plochy kde létá kulička
 
         # Výpočty okrajů pro hraní
         self.horni_levy = ((self.velikost_okna[0] - self.herni_velikost[0]) / 2, 0)
@@ -48,7 +48,7 @@ class GameGraphics:
         self.deska_surface = pygame.Surface(self.game.paddle1.size)
         self.deska_surface.fill(self.zelena)
         self.deska_surface = pygame.image.load("grafika/paddledown.png")#HOLI
-        
+
        # Surface pro kuličku
         self.ball_surface = pygame.Surface(self.game.ball.size)
 
@@ -63,7 +63,18 @@ class GameGraphics:
 
         # Surface pro herni oblast HOLI
         self.oblast_surface = pygame.Surface((self.horni_pravy[0]-self.horni_levy[0]-1,self.spodni_levy[1]- self.horni_levy[1]-1))
-        self.oblast_surface = pygame.image.load("grafika/test.jpg")
+        try:
+            img_url = "grafika/test.jpg"
+            img_url = ' http://webs.zcu.cz/kamery/kamera1.jpg'
+            img_url = 'http://kamera.plzen.cz/webcam.jpg?0.8093254372943193'
+            import urllib
+            import StringIO
+            f = StringIO.StringIO(urllib.urlopen(img_url).read())
+            self.oblast_surface = pygame.image.load(f, 'cam.jpg')
+        except:
+            img_url = "grafika/test.jpg"
+            self.oblast_surface = pygame.image.load(img_url)
+
 
         # Surface pro vypis HOLI
         self.vypis_surfaceBall = pygame.Surface((300,200))
@@ -82,7 +93,7 @@ class GameGraphics:
         pygame.draw.line(self.pozadi, self.bila, self.horni_levy, self.spodni_levy)
         pygame.draw.line(self.pozadi, self.bila, self.horni_pravy, self.spodni_pravy)
 
-    
+
     def CreateBackground(self):
         """
     Tvoří základní pozadí, vše co je vidět
@@ -139,4 +150,4 @@ class GameGraphics:
         self.vypis_surfaceBall = self.pismo.render(text,  1, self.modra, self.cerna)
         textDeska1 = "deska1 dolni|  x:" + str(round(game.paddle1.x))
         self.vypis_surfaceDeska1 = self.pismo.render(textDeska1,  1,self.modra, self.cerna)
-        
+

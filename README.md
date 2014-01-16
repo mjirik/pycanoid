@@ -1,6 +1,14 @@
 pycanoid
 ========
 
+
+    sudo apt-get install python-pygame python opencv
+
+Run
+===
+
+   python pycanoidMain.py
+
 Calibration
 ===========
 
