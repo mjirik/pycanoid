@@ -14,6 +14,7 @@ class GameLogic:
     def __init__(self,parameters):
         self.parameters = parameters
         self.lives = 3
+        self.part = 3
         self.ballInGame = 0 # 1-ball is in game, 0- somebody has lost the ball or begining 
         self.paddle1 = Paddle()
         if parameters['nplayers'] == 2:
@@ -45,26 +46,84 @@ class GameLogic:
         if self.ball.y < self.nahore:
             self.lives -= 1
             self.ballInGame = 0
+#------------------------------------------------------------------------------
 
-        if (self.ball.y < self.paddle2.y + self.paddle2.size[1]) and ((self.ball.x >= self.paddle2.x) and (self.ball.x + self.ball.size[0]) <= (self.paddle2.x + self.paddle2.size[0])):
+        # if (self.ball.y < self.paddle2.y + self.paddle2.size[1]) and ((self.ball.x >= self.paddle2.x) and (self.ball.x + self.ball.size[0]) <= (self.paddle2.x + self.paddle2.size[0])):
+        #     self.reflectYup(self.paddle2.y + self.paddle2.size[1])
+
+        # PADDLE2
+
+        # CENTER
+        if (self.ball.y < self.paddle2.y + self.paddle2.size[1]) and ((self.ball.x >= (self.paddle2.x + (self.paddle2.size[0]/self.part)) and (self.ball.x + self.ball.size[0]) <= (self.paddle2.x + (self.paddle2.size[0] - (self.paddle2.size[0]/self.part))))):
             self.reflectYup(self.paddle2.y + self.paddle2.size[1])
 
-        if (self.ball.y + self.ball.size[1] > self.paddle1.y) and ((self.ball.x >= self.paddle1.x) and (self.ball.x + self.ball.size[0]) <= (self.paddle1.x + self.paddle1.size[0])):
-            self.reflectYdown(self.paddle1.y)
+        #LEFT
+        if (self.ball.y < self.paddle2.y + self.paddle2.size[1]) and ((self.ball.x >= self.paddle2.x) and (self.ball.x + self.ball.size[0]) <= (self.paddle2.x + (self.paddle2.size[0]/self.part))):
+            self.reflectYupLeft(self.paddle2.y + self.paddle2.size[1])
 
+        #RIGHT
+        if (self.ball.y < self.paddle2.y + self.paddle2.size[1]) and ((self.ball.x >= (self.paddle2.x + (self.paddle2.size[0] - (self.paddle2.size[0]/self.part)))) and (self.ball.x + self.ball.size[0]) <= (self.paddle2.x + self.paddle2.size[0])):
+            self.reflectYupRight(self.paddle2.y + self.paddle2.size[1])
+
+        # if (self.ball.y + self.ball.size[1] > self.paddle1.y) and ((self.ball.x >= self.paddle1.x) and (self.ball.x + self.ball.size[0]) <= (self.paddle1.x + self.paddle1.size[0])):
+        #     self.reflectYdown(self.paddle1.y)
+
+        #PADDLE1
+
+        # LEFT
+        if (self.ball.y + self.ball.size[1] > self.paddle1.y) and ((self.ball.x >= self.paddle1.x) and (self.ball.x + self.ball.size[0]) <= (self.paddle1.x + (self.paddle1.size[0]/self.part))):
+            self.reflectYdownLeft(self.paddle1.y)
+
+        #CENTER
+        if (self.ball.y + self.ball.size[1] > self.paddle1.y) and ((self.ball.x >= (self.paddle1.x + (self.paddle1.size[0]/self.part)) and (self.ball.x + self.ball.size[0]) <= (self.paddle1.x + (self.paddle1.size[0] - (self.paddle1.size[0]/self.part))))):
+             self.reflectYdown(self.paddle1.y)
+
+        # RIGHT
+        if (self.ball.y + self.ball.size[1] > self.paddle1.y) and ((self.ball.x >= (self.paddle2.x + (self.paddle2.size[0] - (self.paddle2.size[0]/self.part)))) and (self.ball.x + self.ball.size[0]) <= (self.paddle2.x + self.paddle2.size[0])):
+             self.reflectYdownRight(self.paddle1.y)
+
+
+
+
+
+#-------------------------------------------------------------------------------
         if self.ball.y > self.dole:
             self.lives -= 1
             self.ballInGame = 0
 
     def reflectYup(self, yNew):
         dy = self.ball.y - yNew
-        self.ball.stupen = self.ball.stupen - (2*self.ball.stupen)
+        self.ball.stupen = self.ball.stupen - (2 * self.ball.stupen)
+        self.ball.uhel = math.radians(self.ball.stupen)
+        self.ball.y = self.ball.y - 2 * dy
+
+    def reflectYupRight(self, yNew):
+        dy = self.ball.y - yNew
+        self.ball.stupen = 10 - self.ball.stupen - (2*self.ball.stupen)
+        self.ball.uhel = math.radians(self.ball.stupen)
+        self.ball.y = self.ball.y - 2 * dy
+
+    def reflectYupLeft(self, yNew):
+        dy = self.ball.y - yNew
+        self.ball.stupen = 10 + self.ball.stupen - (2*self.ball.stupen)
         self.ball.uhel = math.radians(self.ball.stupen)
         self.ball.y = self.ball.y - 2 * dy
 
     def reflectYdown(self, yNew):
         dy = self.ball.y + self.ball.size[1] - yNew
         self.ball.stupen = self.ball.stupen - (2*self.ball.stupen)
+        self.ball.uhel = math.radians(self.ball.stupen)
+        self.ball.y = self.ball.y - 2 * dy
+
+    def reflectYdownLeft(self, yNew):
+        dy = self.ball.y + self.ball.size[1] - yNew
+        self.ball.stupen = 10 - self.ball.stupen - (2*self.ball.stupen)
+        self.ball.uhel = math.radians(self.ball.stupen)
+        self.ball.y = self.ball.y - 2 * dy
+
+    def reflectYdownRight(self, yNew):
+        dy = self.ball.y + self.ball.size[1] - yNew
+        self.ball.stupen = 10 + self.ball.stupen - (2*self.ball.stupen)
         self.ball.uhel = math.radians(self.ball.stupen)
         self.ball.y = self.ball.y - 2 * dy
 
