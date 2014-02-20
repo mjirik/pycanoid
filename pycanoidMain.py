@@ -105,7 +105,8 @@ class Pycanoid:
                 else:
                     print "Run camera calibration first"
                     break
-                # Graphics
+
+            # Graphics
             graphics.DrawDesk(m_pos, game.paddle1, 0)
             if parameters['nplayers'] == 2:
                 graphics.DrawDesk(m_pos, game.paddle2, 1)

@@ -1,20 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import pygame
-import numpy as np
-import time
-import math
-import random
-#import pickle
+import pickle
 import yaml
-import os
-
+import numpy as np
 
 class GameGraphics:
     def __init__(self,game,velikost_okna = (1024, 768)):
 
-        self.rows = 10
-        self.cols = 30
+        # self.rows = 10
+        # self.cols = 30
+
+        # self.seznam = []
 
         self.game = game
         self.velikost_okna = velikost_okna
@@ -120,7 +117,7 @@ class GameGraphics:
         self.game.ball.y = self.game.paddle1.y - self.game.ball.size[1]
         self.obrazovka.blit(self.ball_surface, (self.game.ball.x, self.game.ball.y))
 
-    def DrawDesk(self,position, ddeska, ndeska = 0):
+    def DrawDesk(self,position, ddeska, ndeska = 0):  # !!! PREDELAT DESKU Y, JE NATVRDO !!!!!!
         """
     Kontrola spravneho umisteni odrazeci desky
     :param position:
@@ -151,13 +148,19 @@ class GameGraphics:
             self.obrazovka.blit(self.deska_surface, (ddeska.x, ddeska.y))
 
     def GetBlockSize(self):
-        x = float(self.herni_velikost[0] / self.rows)
-        y = float(self.herni_velikost[1] / self.cols)
+        """
+     Spocita velikost bloku tak, aby zustalo misto na kazde
+    strane ve velikosti jednoho bloku.
+        """
+        matrix = np.load('blockmap.npy')
+        x = float(self.herni_velikost[0] / (matrix.shape[0] + 2))
+        y = float(self.herni_velikost[1] / (matrix.shape[1] + 20))
         size = (x,y)
         return size
 
     def BlockArea(self):
-        point = (self.horni_levy[0] + 50, self.horni_levy[1] + 150)
+        odstup = self.GetBlockSize()
+        point = (self.horni_levy[0] + odstup[0], (self.spodni_levy[1]/3.5))
         return point
 
     def DrawInformations(self,game):
@@ -169,17 +172,44 @@ class GameGraphics:
         textDeska1 = "deska1 dolni|  x:" + str(round(game.paddle1.x))
         self.vypis_surfaceDeska1 = self.pismo.render(textDeska1,  1,self.modra, self.cerna)
 
+    # def CreateList(self):
+    #     matrix = np.load('blockmap.npy')
+    #     point = self.BlockArea()
+    #     originalx = point[0]
+    #     size = self.GetBlockSize()
+    #
+    #
+    #     list = [] # Seznam souradnic bloku
+    #
+    #     for r in range(matrix.shape[0]):
+    #         for s in range(matrix.shape[1]):
+    #             if matrix[r,s]:
+    #                 blok = (point[0], point[0] + size[0], point[1], point[1] + size[1])    # (x1, x2, y1, y2)
+    #                 list.append(blok)
+    #             point = (point[0] + size[0], point[1])
+    #         point = (originalx, point[1] + size[1])
+    #     print list
+
+
     def DrawBlocks(self):
         matrix = np.load('blockmap.npy')
         point = self.BlockArea()
-
-        #point = (area[0],area[2])
         originalx = point[0]
         size = self.GetBlockSize()
 
+        # soubor = file('blockxy.config', 'w')
+        self.seznam = []
+
         for r in range(matrix.shape[0]):
             for s in range(matrix.shape[1]):
+
                 if matrix[r,s]:
                     self.obrazovka.blit(self.block_surface, (point[0], point[1]))
+                    blok = (point[0], point[0] + size[0], point[1], point[1] + size[1])    # (x1, x2, y1, y2)
+                    self.seznam.append(blok)
+
                 point = (point[0] + size[0], point[1])
             point = (originalx, point[1] + size[1])
+
+        yaml.dump(self.seznam, open('blockxy.config', 'wb'))
+        # soubor.close()
