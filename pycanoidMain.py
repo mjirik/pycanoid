@@ -111,6 +111,7 @@ class Pycanoid:
                 graphics.DrawDesk(m_pos, game.paddle2, 1)
 
             # Začátek hry
+            graphics.DrawBlocks()
             if game.isBallInGame() == 0:
                 game.GenerateAngle()
                 graphics.DrawBallBegin()

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import pygame
+import numpy as np
 import time
 import math
 import random
@@ -11,6 +12,9 @@ import os
 
 class GameGraphics:
     def __init__(self,game,velikost_okna = (1024, 768)):
+
+        self.rows = 10
+        self.cols = 30
 
         self.game = game
         self.velikost_okna = velikost_okna
@@ -43,6 +47,10 @@ class GameGraphics:
         # Surface pro kreslení všeho vzadu
         self.pozadi = pygame.Surface(self.velikost_okna)
         self.pozadi.fill(self.cerna)
+
+        # Surfce pro blok
+        self.block_surface = pygame.Surface(self.GetBlockSize())
+        self.block_surface.fill(self.bila)
 
         # Surface pro desku
         self.deska_surface = pygame.Surface(self.game.paddle1.size)
@@ -142,6 +150,16 @@ class GameGraphics:
             ddeska.y = deskay
             self.obrazovka.blit(self.deska_surface, (ddeska.x, ddeska.y))
 
+    def GetBlockSize(self):
+        x = float(self.herni_velikost[0] / self.rows)
+        y = float(self.herni_velikost[1] / self.cols)
+        size = (x,y)
+        return size
+
+    def BlockArea(self):
+        point = (self.horni_levy[0] + 50, self.horni_levy[1] + 150)
+        return point
+
     def DrawInformations(self,game):
         """
     Vykresluje ladící výpisy přímo do hry
@@ -151,3 +169,17 @@ class GameGraphics:
         textDeska1 = "deska1 dolni|  x:" + str(round(game.paddle1.x))
         self.vypis_surfaceDeska1 = self.pismo.render(textDeska1,  1,self.modra, self.cerna)
 
+    def DrawBlocks(self):
+        matrix = np.load('blockmap.npy')
+        point = self.BlockArea()
+
+        #point = (area[0],area[2])
+        originalx = point[0]
+        size = self.GetBlockSize()
+
+        for r in range(matrix.shape[0]):
+            for s in range(matrix.shape[1]):
+                if matrix[r,s]:
+                    self.obrazovka.blit(self.block_surface, (point[0], point[1]))
+                point = (point[0] + size[0], point[1])
+            point = (originalx, point[1] + size[1])

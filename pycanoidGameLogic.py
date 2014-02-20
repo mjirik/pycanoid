@@ -48,39 +48,39 @@ class GameLogic:
             self.ballInGame = 0
 #------------------------------------------------------------------------------
 
-        # if (self.ball.y < self.paddle2.y + self.paddle2.size[1]) and ((self.ball.x >= self.paddle2.x) and (self.ball.x + self.ball.size[0]) <= (self.paddle2.x + self.paddle2.size[0])):
-        #     self.reflectYup(self.paddle2.y + self.paddle2.size[1])
-
-        # PADDLE2
-
-        # CENTER
-        if (self.ball.y < self.paddle2.y + self.paddle2.size[1]) and ((self.ball.x >= (self.paddle2.x + (self.paddle2.size[0]/self.part)) and (self.ball.x + self.ball.size[0]) <= (self.paddle2.x + (self.paddle2.size[0] - (self.paddle2.size[0]/self.part))))):
+        if (self.ball.y < self.paddle2.y + self.paddle2.size[1]) and ((self.ball.x >= self.paddle2.x) and (self.ball.x + self.ball.size[0]) <= (self.paddle2.x + self.paddle2.size[0])):
             self.reflectYup(self.paddle2.y + self.paddle2.size[1])
 
-        #LEFT
-        if (self.ball.y < self.paddle2.y + self.paddle2.size[1]) and ((self.ball.x >= self.paddle2.x) and (self.ball.x + self.ball.size[0]) <= (self.paddle2.x + (self.paddle2.size[0]/self.part))):
-            self.reflectYupLeft(self.paddle2.y + self.paddle2.size[1])
+        ## PADDLE2
+        #
+        ## CENTER
+        #if (self.ball.y < self.paddle2.y + self.paddle2.size[1]) and ((self.ball.x >= (self.paddle2.x + (self.paddle2.size[0]/self.part)) and (self.ball.x + self.ball.size[0]) <= (self.paddle2.x + (self.paddle2.size[0] - (self.paddle2.size[0]/self.part))))):
+        #    self.reflectYup(self.paddle2.y + self.paddle2.size[1])
+        #
+        ##LEFT
+        #if (self.ball.y < self.paddle2.y + self.paddle2.size[1]) and ((self.ball.x >= self.paddle2.x) and (self.ball.x + self.ball.size[0]) <= (self.paddle2.x + (self.paddle2.size[0]/self.part))):
+        #    self.reflectYupLeft(self.paddle2.y + self.paddle2.size[1])
+        #
+        ##RIGHT
+        #if (self.ball.y < self.paddle2.y + self.paddle2.size[1]) and ((self.ball.x >= (self.paddle2.x + (self.paddle2.size[0] - (self.paddle2.size[0]/self.part)))) and (self.ball.x + self.ball.size[0]) <= (self.paddle2.x + self.paddle2.size[0])):
+        #    self.reflectYupRight(self.paddle2.y + self.paddle2.size[1])
 
-        #RIGHT
-        if (self.ball.y < self.paddle2.y + self.paddle2.size[1]) and ((self.ball.x >= (self.paddle2.x + (self.paddle2.size[0] - (self.paddle2.size[0]/self.part)))) and (self.ball.x + self.ball.size[0]) <= (self.paddle2.x + self.paddle2.size[0])):
-            self.reflectYupRight(self.paddle2.y + self.paddle2.size[1])
+        if (self.ball.y + self.ball.size[1] > self.paddle1.y) and ((self.ball.x >= self.paddle1.x) and (self.ball.x + self.ball.size[0]) <= (self.paddle1.x + self.paddle1.size[0])):
+            self.reflectYdown(self.paddle1.y)
 
-        # if (self.ball.y + self.ball.size[1] > self.paddle1.y) and ((self.ball.x >= self.paddle1.x) and (self.ball.x + self.ball.size[0]) <= (self.paddle1.x + self.paddle1.size[0])):
+        ##PADDLE1
+        #
+        ## LEFT
+        #if (self.ball.y + self.ball.size[1] > self.paddle1.y) and ((self.ball.x >= self.paddle1.x) and (self.ball.x + self.ball.size[0]) <= (self.paddle1.x + (self.paddle1.size[0]/self.part))):
+        #    self.reflectYdownLeft(self.paddle1.y)
+        #
+        ##CENTER
+        #if (self.ball.y + self.ball.size[1] > self.paddle1.y) and ((self.ball.x >= (self.paddle1.x + (self.paddle1.size[0]/self.part)) and (self.ball.x + self.ball.size[0]) <= (self.paddle1.x + (self.paddle1.size[0] - (self.paddle1.size[0]/self.part))))):
         #     self.reflectYdown(self.paddle1.y)
-
-        #PADDLE1
-
-        # LEFT
-        if (self.ball.y + self.ball.size[1] > self.paddle1.y) and ((self.ball.x >= self.paddle1.x) and (self.ball.x + self.ball.size[0]) <= (self.paddle1.x + (self.paddle1.size[0]/self.part))):
-            self.reflectYdownLeft(self.paddle1.y)
-
-        #CENTER
-        if (self.ball.y + self.ball.size[1] > self.paddle1.y) and ((self.ball.x >= (self.paddle1.x + (self.paddle1.size[0]/self.part)) and (self.ball.x + self.ball.size[0]) <= (self.paddle1.x + (self.paddle1.size[0] - (self.paddle1.size[0]/self.part))))):
-             self.reflectYdown(self.paddle1.y)
-
-        # RIGHT
-        if (self.ball.y + self.ball.size[1] > self.paddle1.y) and ((self.ball.x >= (self.paddle2.x + (self.paddle2.size[0] - (self.paddle2.size[0]/self.part)))) and (self.ball.x + self.ball.size[0]) <= (self.paddle2.x + self.paddle2.size[0])):
-             self.reflectYdownRight(self.paddle1.y)
+        #
+        ## RIGHT
+        #if (self.ball.y + self.ball.size[1] > self.paddle1.y) and ((self.ball.x >= (self.paddle2.x + (self.paddle2.size[0] - (self.paddle2.size[0]/self.part)))) and (self.ball.x + self.ball.size[0]) <= (self.paddle2.x + self.paddle2.size[0])):
+        #     self.reflectYdownRight(self.paddle1.y)
 
 
 
