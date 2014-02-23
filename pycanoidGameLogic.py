@@ -35,7 +35,22 @@ class GameLogic:
         self.leva = leva    # X souřadnice pro levou herní plochu
         self.nahore = nahore  # Y souřadnice pro horní stranu
         self.dole = dole   # Y souřadnice spodního kraje
-        
+
+    def hit(self, n):
+        print "narazil na: ", n
+        matrix = np.load('blockmap.npy')
+        tvar = matrix.shape
+        k = 0
+        for r in range(tvar[0]):
+            for s in range(tvar[1]):
+                if k == n:
+                    print 'shoda na: ', (r,s)
+                    matrix[r,s] = 0
+                k = k + 1
+        # k = k + 1
+        np.save('blockmap.npy', matrix)
+
+
     def moveBall(self, dt):
         dx = math.cos(self.ball.uhel) * self.ball.speed * dt   # Výpočet příštích souřadnic x,y
         dy = math.sin(self.ball.uhel) * self.ball.speed * dt
@@ -55,19 +70,27 @@ class GameLogic:
         stream = file('blockxy.config', 'r')
         table = yaml.load(stream)
 
+        i = 0
         for data in table:
-            if (self.ball.y < data[3]) and ((self.ball.x >= data[0]) and (self.ball.x + self.ball.size[0]) <= (data[1])): # ODRAZ DOLE
+            if (self.ball.y < data[3]) and ((self.ball.x >= data[0]) and (self.ball.x + self.ball.size[0]) <= (data[1])):                       # ODRAZ DOLE
                 self.reflectYup(data[3])
+                print data
+                self.hit(i)
 
             if ((self.ball.y + self.ball.size[1]) < data[2]) and ((self.ball.x >= data[0]) and (self.ball.x + self.ball.size[0]) <= (data[1])): # ODRAZ HORE
                 self.reflectYdown(data[2])
+                self.hit(i)
 
-            if (self.ball.x < data[1]) and ((self.ball.y <= data[2]) and (self.ball.y + self.ball.size[1]) <= (data[3])): # ODRAZ PRAVA
+            if (self.ball.x == data[1]) and ((self.ball.y <= data[2]) and ((self.ball.y + self.ball.size[1]) <= data[3])):                       # ODRAZ PRAVA
                 self.reflectXleft(data[1])
+                self.hit(i)
 
-            if (self.ball.x < data[0]) and ((self.ball.y <= data[2]) and (self.ball.y + self.ball.size[1]) <= (data[3])): # ODRAZ LEVA
+            if ((self.ball.x + self.ball.size[0]) == data[0]) and ((self.ball.y <= data[2]) and (self.ball.y + self.ball.size[1]) <= data[3]): # ODRAZ LEVA
                 self.reflectXright(data[0])
+                self.hit(i)
+            i = i + 1
         # stream.close()
+
 
         # ---------------- DETEKCE HRAN -------------------
 
