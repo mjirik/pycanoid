@@ -155,12 +155,13 @@ class GameGraphics:
         matrix = np.load('blockmap.npy')
         x = float(self.herni_velikost[0] / (matrix.shape[0] + 2))
         y = float(self.herni_velikost[1] / (matrix.shape[1] + 20))
-        size = (x,y)
+        size = (round(x, 0), round(y, 0))
         return size
 
     def BlockArea(self):
         odstup = self.GetBlockSize()
         point = (self.horni_levy[0] + odstup[0], (self.spodni_levy[1]/3.5))
+        point = (round(point[0], 0), round(point[1], 0))
         return point
 
     def DrawInformations(self,game):
@@ -211,5 +212,5 @@ class GameGraphics:
                 point = (point[0] + size[0], point[1])
             point = (originalx, point[1] + size[1])
 
-        yaml.dump(self.seznam, open('blockxy.config', 'wb'))
-        # soubor.close()
+        yaml.dump(self.seznam, open('blockxy.config', 'w'))
+        #soubor.close()

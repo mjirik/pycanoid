@@ -46,6 +46,29 @@ class GameLogic:
         self.ball.x += dx                   # Výpočet nových souřadnic s kompenzací času
         self.ball.y += dy
 
+        self.ball.x = round(self.ball.x, 0)                   # Výpočet nových souřadnic s kompenzací času
+        self.ball.y = round(self.ball.y, 0)
+
+        # self.ball.x = round(self.ball.x, 1)
+
+        # --------------- DETEKCE BLOKU -------------------
+        stream = file('blockxy.config', 'r')
+        table = yaml.load(stream)
+
+        for data in table:
+            if (self.ball.y < data[3]) and ((self.ball.x >= data[0]) and (self.ball.x + self.ball.size[0]) <= (data[1])): # ODRAZ DOLE
+                self.reflectYup(data[3])
+
+            if ((self.ball.y + self.ball.size[1]) < data[2]) and ((self.ball.x >= data[0]) and (self.ball.x + self.ball.size[0]) <= (data[1])): # ODRAZ HORE
+                self.reflectYdown(data[2])
+
+            if (self.ball.x < data[1]) and ((self.ball.y <= data[2]) and (self.ball.y + self.ball.size[1]) <= (data[3])): # ODRAZ PRAVA
+                self.reflectXleft(data[1])
+
+            if (self.ball.x < data[0]) and ((self.ball.y <= data[2]) and (self.ball.y + self.ball.size[1]) <= (data[3])): # ODRAZ LEVA
+                self.reflectXright(data[0])
+        # stream.close()
+
         # ---------------- DETEKCE HRAN -------------------
 
         if self.ball.x + self.ball.size[0] > self.prava:
