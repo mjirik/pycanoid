@@ -37,17 +37,20 @@ class GameLogic:
         self.dole = dole   # Y souřadnice spodního kraje
 
     def hit(self, n):
-        print "narazil na: ", n
         matrix = np.load('blockmap.npy')
         tvar = matrix.shape
         k = 0
+        run = True
         for r in range(tvar[0]):
             for s in range(tvar[1]):
-                if k == n:
-                    print 'shoda na: ', (r,s)
-                    matrix[r,s] = 0
-                k = k + 1
-        # k = k + 1
+                if matrix[r,s]:
+                    k = k + 1
+                    if k == n:
+                        matrix[r,s] = 0
+                        run = False
+                        break
+            if not run:
+                break
         np.save('blockmap.npy', matrix)
 
 
@@ -61,35 +64,34 @@ class GameLogic:
         self.ball.x += dx                   # Výpočet nových souřadnic s kompenzací času
         self.ball.y += dy
 
-        self.ball.x = round(self.ball.x, 0)                   # Výpočet nových souřadnic s kompenzací času
+        self.ball.x = round(self.ball.x, 0)
         self.ball.y = round(self.ball.y, 0)
 
-        # self.ball.x = round(self.ball.x, 1)
-
         # --------------- DETEKCE BLOKU -------------------
-        stream = file('blockxy.config', 'r')
-        table = yaml.load(stream)
+        stream = file('blockxy.config', 'rb')
+        table = yaml.load(stream) # [(x1,x2,y1,y2),....,]
 
         i = 0
         for data in table:
-            if (self.ball.y < data[3]) and ((self.ball.x >= data[0]) and (self.ball.x + self.ball.size[0]) <= (data[1])):                       # ODRAZ DOLE
-                self.reflectYup(data[3])
-                print data
-                self.hit(i)
+            if (self.ball.y < data[3]) and ((self.ball.x >= data[0]) and (self.ball.x + self.ball.size[0]) <= (data[1])):# ODRAZ DOLE
+                 self.hit(i)
+                 self.reflectYup(data[3])
 
-            if ((self.ball.y + self.ball.size[1]) < data[2]) and ((self.ball.x >= data[0]) and (self.ball.x + self.ball.size[0]) <= (data[1])): # ODRAZ HORE
-                self.reflectYdown(data[2])
-                self.hit(i)
+            # elif (self.ball.y + self.ball.size[1] >= data[2]) and (self.ball.x + self.ball.size[0] <= data[1]) and (self.ball.x >= data[0]):  # elif ((self.ball.y + self.ball.size[1]) >= data[2]) and ((self.ball.x >= data[0])) and (self.ball.x + self.ball.size[0]) <= (data[1])): # ODRAZ NAHORE
+            #     self.hit(i)
+            #     self.reflectYdown(data[2])
 
-            if (self.ball.x == data[1]) and ((self.ball.y <= data[2]) and ((self.ball.y + self.ball.size[1]) <= data[3])):                       # ODRAZ PRAVA
-                self.reflectXleft(data[1])
-                self.hit(i)
+            # elif (self.ball.x == data[1]) and ((self.ball.y <= data[2]) and ((self.ball.y + self.ball.size[1]) <= data[3])):                       # ODRAZ PRAVA
+            #     self.hit(i)
+            #     self.reflectXleft(data[1])
+            #
+            # elif ((self.ball.x + self.ball.size[0]) == data[0]) and ((self.ball.y <= data[2]) and (self.ball.y + self.ball.size[1]) <= data[3]): # ODRAZ LEVA
+            #     self.hit(i)
+            #     self.reflectXright(data[0])
 
-            if ((self.ball.x + self.ball.size[0]) == data[0]) and ((self.ball.y <= data[2]) and (self.ball.y + self.ball.size[1]) <= data[3]): # ODRAZ LEVA
-                self.reflectXright(data[0])
-                self.hit(i)
             i = i + 1
-        # stream.close()
+        stream.close()
+        print i
 
 
         # ---------------- DETEKCE HRAN -------------------
@@ -152,17 +154,17 @@ class GameLogic:
         self.ball.uhel = math.radians(self.ball.stupen)
         self.ball.y = self.ball.y - 2 * dy
 
-    def reflectYupRight(self, yNew):
-        dy = self.ball.y - yNew
-        self.ball.stupen = 10 - self.ball.stupen - (2*self.ball.stupen)
-        self.ball.uhel = math.radians(self.ball.stupen)
-        self.ball.y = self.ball.y - 2 * dy
-
-    def reflectYupLeft(self, yNew):
-        dy = self.ball.y - yNew
-        self.ball.stupen = 10 + self.ball.stupen - (2*self.ball.stupen)
-        self.ball.uhel = math.radians(self.ball.stupen)
-        self.ball.y = self.ball.y - 2 * dy
+    # def reflectYupRight(self, yNew):
+    #     dy = self.ball.y - yNew
+    #     self.ball.stupen = 10 - self.ball.stupen - (2*self.ball.stupen)
+    #     self.ball.uhel = math.radians(self.ball.stupen)
+    #     self.ball.y = self.ball.y - 2 * dy
+    #
+    # def reflectYupLeft(self, yNew):
+    #     dy = self.ball.y - yNew
+    #     self.ball.stupen = 10 + self.ball.stupen - (2*self.ball.stupen)
+    #     self.ball.uhel = math.radians(self.ball.stupen)
+    #     self.ball.y = self.ball.y - 2 * dy
 
     def reflectYdown(self, yNew):
         dy = self.ball.y + self.ball.size[1] - yNew
@@ -170,17 +172,17 @@ class GameLogic:
         self.ball.uhel = math.radians(self.ball.stupen)
         self.ball.y = self.ball.y - 2 * dy
 
-    def reflectYdownLeft(self, yNew):
-        dy = self.ball.y + self.ball.size[1] - yNew
-        self.ball.stupen = 10 - self.ball.stupen - (2*self.ball.stupen)
-        self.ball.uhel = math.radians(self.ball.stupen)
-        self.ball.y = self.ball.y - 2 * dy
-
-    def reflectYdownRight(self, yNew):
-        dy = self.ball.y + self.ball.size[1] - yNew
-        self.ball.stupen = 10 + self.ball.stupen - (2*self.ball.stupen)
-        self.ball.uhel = math.radians(self.ball.stupen)
-        self.ball.y = self.ball.y - 2 * dy
+    # def reflectYdownLeft(self, yNew):
+    #     dy = self.ball.y + self.ball.size[1] - yNew
+    #     self.ball.stupen = 10 - self.ball.stupen - (2*self.ball.stupen)
+    #     self.ball.uhel = math.radians(self.ball.stupen)
+    #     self.ball.y = self.ball.y - 2 * dy
+    #
+    # def reflectYdownRight(self, yNew):
+    #     dy = self.ball.y + self.ball.size[1] - yNew
+    #     self.ball.stupen = 10 + self.ball.stupen - (2*self.ball.stupen)
+    #     self.ball.uhel = math.radians(self.ball.stupen)
+    #     self.ball.y = self.ball.y - 2 * dy
 
     def reflectXright(self, xNew):
         dx = self.ball.x + self.ball.size[0] - xNew
@@ -197,7 +199,7 @@ class GameLogic:
     def GenerateAngle(self):
         stupen = random.randint(10, 171)
         if stupen == -90:
-            GenerateAngle()
+            self.GenerateAngle()
         self.ball.stupen = - stupen
         self.ball.uhel = math.radians(- stupen)
 
