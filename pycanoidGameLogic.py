@@ -91,7 +91,6 @@ class GameLogic:
 
             i = i + 1
         stream.close()
-        print i
 
 
         # ---------------- DETEKCE HRAN -------------------
