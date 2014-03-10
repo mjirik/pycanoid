@@ -24,22 +24,23 @@ kinectClientInstance = None
 class KinectControl():
     
    def __init__(self):
-       self.nasedata = []
+       self.data = []
+       self.kk = None
        
       
+   def set_KinectKlient(self,kk):
+       self.kk = kk
+       pass
+   
    def save_data(self, data):
        print "save data"
        self.data = data
     
    def get_pos(self):
        print "Position"
-       if complete_data:
-           position = complete_data
-           return position
-       else:
-           m = "prazdna complete data"
-           return m
-
+       position = self.data
+       return position
+       
 class KinectClient(WebSocketClientProtocol):
     
     def sendSkeletonRequest(self):
@@ -55,6 +56,7 @@ class KinectClient(WebSocketClientProtocol):
             print dir(self.factory.app)
             print "pred save data"
             self.factory.app.save_data(self.data)
+            #self.sendSkeletonRequest()
         else:
             print "No msg"
     
