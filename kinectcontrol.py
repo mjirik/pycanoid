@@ -16,33 +16,38 @@ from autobahn.websocket import connectWS
 
 #host = "ws://148.228.186.59:9002" 
 host = "ws://localhost:9002" 
-LOOP_TIME =  6
+LOOP_TIME =  0.1
 
 
 kinectClientInstance = None
 
 class KinectControl():
     
-    def __init__(self): # , reactor=reactor): 
+    def __init__(self, host=host, save_data=None, loop_time=LOOP_TIME, reactor=reactor): 
+        if save_data is None:
+            save_data=self.save_data
+        factory = ClientFactory(host, save_data)
+        factory.protocol = KinectClient
+        connectWS(factory)
+        self.reactor=reactor
+
         self.data = []
         self.kk = None
        
       
-    def set_KinectKlient(self,kk):
-        self.kk = kk
-        pass
-
-    def set_reactor(self, reactor):
-        self.reactor=reactor
-   
+  
     def save_data(self, data):
-        print "save data"
+        #print "save data"
         self.data = data
     
     def get_pos(self):
-        print "Position"
+        #print "Position"
         position = self.data
         return position
+        
+    def print_pos(self):
+        #print "print_pos()"
+        print self.data
        
 class KinectClient(WebSocketClientProtocol):
     
@@ -52,7 +57,7 @@ class KinectClient(WebSocketClientProtocol):
     #    self.send_skel_request_loop()
     
     def sendSkeletonRequest(self):
-        print "Skeleton request"
+        #print "Skeleton request"
         self.sendMessage("skeleton")
         
     #def send_skel_request_loop(self):
@@ -63,8 +68,8 @@ class KinectClient(WebSocketClientProtocol):
         
         
     def onMessage(self, msg, binary):
-        print "On message"
-        print msg
+        #print "On message"
+        #print msg
         
         if len(msg) > 2:
             data = json.loads(msg)
@@ -90,7 +95,7 @@ class KinectClient(WebSocketClientProtocol):
     #    return data        
         
     def onOpen(self):
-        print 'On open'
+        #print 'On open'
         self.sendSkeletonRequest()
         #self.send_skel_request_loop()
         
@@ -119,19 +124,22 @@ class ClientFactory(autobahn.websocket.WebSocketClientFactory):
         print "connection failed"
 
 
-def fcn(a):
-    print a
-    #reactor.callLater(2, fcn, "ahojjj print")
+def print_pos_repeated(kcontrol, loop_time = 1):
+    pos = kcontrol.get_pos()
+    print "print pos repeated"
+    print pos
+    
+    reactor.callLater(loop_time, print_pos_repeated, kcontrol)
 
 if __name__ == "__main__":
 
     kin = KinectControl()  #reactor)
     #kin.set_reactor(reactor)
 
-    factory = ClientFactory(host, kin.save_data)
-    factory.protocol = KinectClient
-    connectWS(factory)
-    reactor.callLater(5, fcn, "ahojjj print")
+    #factory = ClientFactory(host, kin.save_data)
+    #factory.protocol = KinectClient
+    #connectWS(factory)
+    rr = reactor.callLater(1, print_pos_repeated, kin)
     reactor.run()
 
     #print "pred get pos"
