@@ -17,69 +17,103 @@ from autobahn.websocket import connectWS
 #host = "ws://148.228.186.59:9002" 
 host = "ws://localhost:9002" 
 
-data = {"LeftHand":{"X":0, "Y":0}}
+complete_data = []
 
 kinectClientInstance = None
 
 class KinectControl():
     
    def __init__(self):
-      self.factory = WebSocketClientFactory(host, debug = False)
-      self.factory.protocol = KinectClient
-      connectWS(self.factory)
-      print "KC init"
-      print kinectClientInstance
-      print dir(kinectClientInstance)
+       self.nasedata = []
+       
       
-    
-    #reactor.run()
-
+   def save_data(self, data):
+       print "save data"
+       self.data = data
     
    def get_pos(self):
-       
-       positionX = data["LeftHand"]['X']
-       positionY = data["LeftHand"]['Y']
-       position = (positionX, positionY)
-       
-       #self.factory.protocol.sendSkeletonRequest()
-       return position
+       print "Position"
+       if complete_data:
+           position = complete_data
+           return position
+       else:
+           m = "prazdna complete data"
+           return m
 
 class KinectClient(WebSocketClientProtocol):
     
     def sendSkeletonRequest(self):
-        print "send skeleton request"
+        print "Skeleton request"
         self.sendMessage("skeleton")
         
     def onMessage(self, msg, binary):
-        print "on message"
+        print "On message"
         if len(msg) > 2:
             self.data = json.loads(msg)
-            data = self.data[0]
-            print data
-
+            complete_data = self.data
+            print 'Data: ',self.data
+            print dir(self.factory.app)
+            print "pred save data"
+            self.factory.app.save_data(self.data)
+        else:
+            print "No msg"
+    
+    def process(self, data):
+        return data        
+        
     def onOpen(self):
+        print 'On open'
         self.sendSkeletonRequest()
-        #self.data = None
-        print "on open"
-        #kinectClientInstance = self
-        print "on open"
+        
+#class 
+
+class ClientFactory(autobahn.websocket.WebSocketClientFactory):
+    
+    #self.protocol = WebSocketClientProtocol
+    
+    def __init__(self, host, app):
+        autobahn.websocket.WebSocketClientFactory.__init__(self, url=host, debug=False)
+        self.app = app
+
+#####################################################
+#####################################################
+        
+    def clientConnectionLost(self, connector, reason):
+        self.app.main_window.set_online_status(False)
+        self.app.main_window.btn_connect.setEnabled(True)
+        print "connection lost"
+    
+    def clientConnectionFailed(self, connector, reason):
+        self.app.main_window.set_online_status(False)
+        self.app.main_window.btn_connect.setEnabled(True)
+        print "connection failed"
+
         
 if __name__ == "__main__":
-    #kinect = KinectControl()
-    factory = WebSocketClientFactory(host, debug = False)
+
+
+
+    kin = KinectControl()
+
+    factory = ClientFactory(host, kin)
     factory.protocol = KinectClient
     connectWS(factory)
-    print "run"
     reactor.run()
+
+    #print "pred get pos"
+    #neco = kin.get_pos()
     
-    #print kinect.get_pos()
     
-   #while True:
-    #    print kinect.get_pos()
-#    #pygame.init()
- #   factory = WebSocketClientFactory(host, debug = False)
-  #  factory.protocol = KinectClient
-   # print "sdfas"
-    #connectWS(factory)
-   # print "sdfas"
+    
+    #print neco
+    
+    #react = reactor
+    #react.run()
+    
+    
+        
+    
+   # factory = WebSocketClientFactory(host, debug = False)
+   # factory.protocol = KinectClient
+   # connectWS(factory)
    # reactor.run()
