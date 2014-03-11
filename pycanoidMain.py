@@ -88,7 +88,7 @@ class Pycanoid:
                 print "Run camera calibration first"
                 raise Exception('Run camera calibration first', 'Run camera calibration first')
         elif self.parameters['control1'] == 'kinect':  # Face control
-            self.ctrl.get_pos()
+            m_pos = self.ctrl.get_pos()
 
         # Graphics
         self.graphics.DrawDesk(m_pos, self.game.paddle1, 0)
@@ -144,15 +144,15 @@ class Pycanoid:
 
         # Control
         if self.parameters['control1'] == 'face':
-            ctrl = facecontrol.Facecontrol()
+            self.ctrl = facecontrol.Facecontrol()
         if self.parameters["control1"] == "kinect":
-            ctrl = kinectcontrol.KinectControl()
+            self.ctrl = kinectcontrol.KinectControl()
             host = "ws://localhost:9002" 
-            factory = kinectcontrol.ClientFactory(host, ctrl)
-            factory.protocol = kinectcontrol.KinectClient
-            kinectcontrol.connectWS(factory)
+           # factory = kinectcontrol.ClientFactory(host, ctrl)
+            #factory.protocol = kinectcontrol.KinectClient
+            #kinectcontrol.connectWS(factory)
         else:
-            ctrl = None
+            self.ctrl = None
         # Nastaveni FPS
         FPS = 60
         fpsClock = pygame.time.Clock()
@@ -169,7 +169,7 @@ class Pycanoid:
         tick.start(1.0 / FPS)
 
 # Set up anything else twisted here, like listening sockets
-
+        
         reactor.run() # Omit this if this is a tap/tac file
         #reactor.run()
         #while self.running:

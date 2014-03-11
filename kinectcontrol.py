@@ -16,7 +16,7 @@ from autobahn.websocket import connectWS
 
 #host = "ws://148.228.186.59:9002" 
 host = "ws://localhost:9002" 
-LOOP_TIME =  0.1
+LOOP_TIME =  0.05
 
 
 kinectClientInstance = None
@@ -31,22 +31,24 @@ class KinectControl():
         connectWS(factory)
         self.reactor=reactor
 
-        self.data = []
+        #self.data = {}
+        self.data = [{'RightHand':{"X":0, "Y":0}}]
         self.kk = None
        
       
   
     def save_data(self, data):
-        #print "save data"
         self.data = data
     
     def get_pos(self):
-        #print "Position"
-        position = self.data
-        return position
+        everything = self.data
+        if len(everything) > 0:
+            position = (everything[0]['RightHand']['X'], everything[0]['RightHand']['Y'])
+            return position
+        else:
+            return (0,0)
         
     def print_pos(self):
-        #print "print_pos()"
         print self.data
        
 class KinectClient(WebSocketClientProtocol):
@@ -126,8 +128,6 @@ class ClientFactory(autobahn.websocket.WebSocketClientFactory):
 
 def print_pos_repeated(kcontrol, loop_time = 1):
     pos = kcontrol.get_pos()
-    print "print pos repeated"
-    print pos
     
     reactor.callLater(loop_time, print_pos_repeated, kcontrol)
 
