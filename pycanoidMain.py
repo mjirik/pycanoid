@@ -15,10 +15,12 @@ from twisted.internet import reactor
 from pycanoidGameLogic import GameLogic
 from pycanoidGraphics import GameGraphics
 
+
+
 from gamearea import Gamearea
 import facecontrol
 import kinectcontrol
-
+import kinectCallibration
 # version comparison
 from pkg_resources import parse_version
 
@@ -69,9 +71,11 @@ class Pycanoid:
     def game_tick(self):
         self.click = self.game.isBallInGame()
         self.graphics.CreateBackground()
+        
         # Control
         if self.parameters['control1'] == 'mouse':
             m_pos = pygame.mouse.get_pos()    # aktuální pozice myši
+            
         elif self.parameters['control1'] == 'face':  # Face control
             # Loading game area parameters
             if os.path.exists("area_params.ps"):
@@ -87,7 +91,13 @@ class Pycanoid:
             else:
                 print "Run camera calibration first"
                 raise Exception('Run camera calibration first', 'Run camera calibration first')
+                
         elif self.parameters['control1'] == 'kinect':  # Face control
+            if os.path.exists('kinect_borders.config'):
+                f = open('kinect_borders.config','rb')
+                borders = yaml.load(f)
+                f.close()
+                
             m_pos = self.ctrl.get_pos()
 
         # Graphics
@@ -121,15 +131,7 @@ class Pycanoid:
                 prev_time = time.time()
                 self.actual_time = time.time()
                 self.game.setBallInGame(1)
-            ##
-            ##
-            ##        # synchronizace po síti
-            ##        if parameters['nplayers'] > 1:
-            ##            game_state = mux_game_state(deska, deska2, ball)
-            ##            game_state = comunication_loop(game_state, comunication_parameters)
-            ##            deska, deska2, ball = demux_game_state(game_state, deska, deska2, ball)
-            ##
-            ##
+
         pygame.display.update()
 
     def run(self):
@@ -146,36 +148,22 @@ class Pycanoid:
         if self.parameters['control1'] == 'face':
             self.ctrl = facecontrol.Facecontrol()
         if self.parameters["control1"] == "kinect":
-            self.ctrl = kinectcontrol.KinectControl()
-            host = "ws://localhost:9002" 
-           # factory = kinectcontrol.ClientFactory(host, ctrl)
-            #factory.protocol = kinectcontrol.KinectClient
-            #kinectcontrol.connectWS(factory)
+            self.ctrl = kinectcontrol.KinectControl()           
         else:
             self.ctrl = None
+        
         # Nastaveni FPS
         FPS = 60
-        fpsClock = pygame.time.Clock()
-
         pygame.display.update()
 
         self.running = 1
         self.click = 0
 
-        print (self.graphics.spodni_levy[1] - self.graphics.horni_levy[1] - 1)
+        #print (self.graphics.spodni_levy[1] - self.graphics.horni_levy[1] - 1)
         
-        # Set up a looping call every 1/30th of a second to run your game tick
         tick = LoopingCall(self.game_tick)
-        tick.start(1.0 / FPS)
-
-# Set up anything else twisted here, like listening sockets
-        
-        reactor.run() # Omit this if this is a tap/tac file
-        #reactor.run()
-        #while self.running:
-        #    self.game_tick(game, graphics, parameters, ctrl)
-        #    fpsClock.tick(FPS)
-
+        tick.start(1.0 / FPS)        
+        reactor.run()
 
 if __name__ == "__main__":
     pycanoid = Pycanoid()
