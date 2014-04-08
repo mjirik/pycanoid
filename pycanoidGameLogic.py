@@ -13,7 +13,7 @@ pygame.init()
 
 class GameLogic:
     def __init__(self,parameters):
-        self.generateBlocks()
+        #self.generateBlocks()
         self.parameters = parameters
         self.lives = 3
         self.part = 3
@@ -22,6 +22,14 @@ class GameLogic:
         if parameters['nplayers'] == 2:
             self.paddle2 = Paddle()
         self.ball = Ball()
+        self.leva_horni  = (self.ball.x, self.ball.y)
+        self.leva_spodni  = (self.ball.x, self.ball.y + self.ball.size[1])
+        self.prava_spodni  = (self.ball.x + self.ball.size[0], self.ball.y + self.ball.size[1])
+        self.prava_horni  = (self.ball.x + self.ball.size[0], self.ball.y)
+        self.kolize_blok = -1
+
+    def setkolize(self, blok):
+        self.kolize_blok = blok
 
     def generateBlocks(self):
         """
@@ -64,33 +72,28 @@ class GameLogic:
         self.ball.x += dx                   # Výpočet nových souřadnic s kompenzací času
         self.ball.y += dy
 
-        self.ball.x = round(self.ball.x, 0)
-        self.ball.y = round(self.ball.y, 0)
+        self.ball.x = self.ball.x
+        self.ball.y = self.ball.y
 
-        # --------------- DETEKCE BLOKU -------------------
-        stream = file('blockxy.config', 'rb')
-        table = yaml.load(stream) # [(x1,x2,y1,y2),....,]
+        if self.kolize_blok != -1:  # doslo ke kolizi
+            mic_stred_prava = (self.ball.x+self.ball.size[0], self.ball.y+(self.ball.size[1]/2))
+            deska_stred_leva = (self.kolize_blok[0], self.kolize_blok[1]+(self.kolize_blok[3]/2))
+            mic_stred_leva = (self.ball.x, self.ball.y+(self.ball.size[1]/2))
+            deska_stred_prava = (self.kolize_blok[0]+self.kolize_blok[2], self.kolize_blok[1]+(self.kolize_blok[3]/2))
+            mic_stred_horni = (self.ball.x+(self.ball.size[0]/2), self.ball.y)
+            deska_stred_spodni = (self.kolize_blok[0]+(self.kolize_blok[2]/2), self.kolize_blok[1]+self.kolize_blok[3])
+            mic_stred_spodni = (self.ball.x+(self.ball.size[0]/2), self.ball.y+self.ball.size[1])
+            deska_stred_horni = (self.kolize_blok[0]+(self.kolize_blok[2]/2),self.kolize_blok[1])
 
-        i = 0
-        for data in table:
-            if (self.ball.y < data[3]) and ((self.ball.x >= data[0]) and (self.ball.x + self.ball.size[0]) <= (data[1])):# ODRAZ DOLE
-                 self.hit(i)
-                 self.reflectYup(data[3])
 
-            # elif (self.ball.y + self.ball.size[1] >= data[2]) and (self.ball.x + self.ball.size[0] <= data[1]) and (self.ball.x >= data[0]):  # elif ((self.ball.y + self.ball.size[1]) >= data[2]) and ((self.ball.x >= data[0])) and (self.ball.x + self.ball.size[0]) <= (data[1])): # ODRAZ NAHORE
-            #     self.hit(i)
-            #     self.reflectYdown(data[2])
-
-            # elif (self.ball.x == data[1]) and ((self.ball.y <= data[2]) and ((self.ball.y + self.ball.size[1]) <= data[3])):                       # ODRAZ PRAVA
-            #     self.hit(i)
-            #     self.reflectXleft(data[1])
-            #
-            # elif ((self.ball.x + self.ball.size[0]) == data[0]) and ((self.ball.y <= data[2]) and (self.ball.y + self.ball.size[1]) <= data[3]): # ODRAZ LEVA
-            #     self.hit(i)
-            #     self.reflectXright(data[0])
-
-            i = i + 1
-        stream.close()
+            if (mic_stred_prava[0] >= deska_stred_leva[0]) and (mic_stred_leva[0] < deska_stred_leva[0]):
+                self.reflectXright(self.kolize_blok[0])
+            elif (mic_stred_leva[0] >= deska_stred_prava[0]) and (mic_stred_prava[0] > deska_stred_prava[0]):
+                self.reflectXleft(self.kolize_blok[0]+self.kolize_blok[2])
+            elif (mic_stred_horni[1] <= deska_stred_spodni[1]) and (mic_stred_spodni[1] > deska_stred_spodni[1]):
+                self.reflectYup(self.kolize_blok[1]+self.kolize_blok[3])
+            elif (mic_stred_spodni[1] >= deska_stred_horni[1]) and (mic_stred_horni[1] < deska_stred_horni[1]):
+                self.reflectYdown(self.kolize_blok[1])
 
 
         # ---------------- DETEKCE HRAN -------------------
@@ -114,38 +117,9 @@ class GameLogic:
         if (self.ball.y < self.paddle2.y + self.paddle2.size[1]) and ((self.ball.x >= self.paddle2.x) and (self.ball.x + self.ball.size[0]) <= (self.paddle2.x + self.paddle2.size[0])):
             self.reflectYup(self.paddle2.y + self.paddle2.size[1])
 
-        ## PADDLE2
-        #
-        ## CENTER
-        #if (self.ball.y < self.paddle2.y + self.paddle2.size[1]) and ((self.ball.x >= (self.paddle2.x + (self.paddle2.size[0]/self.part)) and (self.ball.x + self.ball.size[0]) <= (self.paddle2.x + (self.paddle2.size[0] - (self.paddle2.size[0]/self.part))))):
-        #    self.reflectYup(self.paddle2.y + self.paddle2.size[1])
-        #
-        ##LEFT
-        #if (self.ball.y < self.paddle2.y + self.paddle2.size[1]) and ((self.ball.x >= self.paddle2.x) and (self.ball.x + self.ball.size[0]) <= (self.paddle2.x + (self.paddle2.size[0]/self.part))):
-        #    self.reflectYupLeft(self.paddle2.y + self.paddle2.size[1])
-        #
-        ##RIGHT
-        #if (self.ball.y < self.paddle2.y + self.paddle2.size[1]) and ((self.ball.x >= (self.paddle2.x + (self.paddle2.size[0] - (self.paddle2.size[0]/self.part)))) and (self.ball.x + self.ball.size[0]) <= (self.paddle2.x + self.paddle2.size[0])):
-        #    self.reflectYupRight(self.paddle2.y + self.paddle2.size[1])
-
         if (self.ball.y + self.ball.size[1] > self.paddle1.y) and ((self.ball.x >= self.paddle1.x) and (self.ball.x + self.ball.size[0]) <= (self.paddle1.x + self.paddle1.size[0])):
             self.reflectYdown(self.paddle1.y)
 
-        ##PADDLE1
-        #
-        ## LEFT
-        #if (self.ball.y + self.ball.size[1] > self.paddle1.y) and ((self.ball.x >= self.paddle1.x) and (self.ball.x + self.ball.size[0]) <= (self.paddle1.x + (self.paddle1.size[0]/self.part))):
-        #    self.reflectYdownLeft(self.paddle1.y)
-        #
-        ##CENTER
-        #if (self.ball.y + self.ball.size[1] > self.paddle1.y) and ((self.ball.x >= (self.paddle1.x + (self.paddle1.size[0]/self.part)) and (self.ball.x + self.ball.size[0]) <= (self.paddle1.x + (self.paddle1.size[0] - (self.paddle1.size[0]/self.part))))):
-        #     self.reflectYdown(self.paddle1.y)
-        #
-        ## RIGHT
-        #if (self.ball.y + self.ball.size[1] > self.paddle1.y) and ((self.ball.x >= (self.paddle2.x + (self.paddle2.size[0] - (self.paddle2.size[0]/self.part)))) and (self.ball.x + self.ball.size[0]) <= (self.paddle2.x + self.paddle2.size[0])):
-        #     self.reflectYdownRight(self.paddle1.y)
-
-        #----------------------------------------------------------
 
     def reflectYup(self, yNew):
         dy = self.ball.y - yNew
@@ -153,35 +127,11 @@ class GameLogic:
         self.ball.uhel = math.radians(self.ball.stupen)
         self.ball.y = self.ball.y - 2 * dy
 
-    # def reflectYupRight(self, yNew):
-    #     dy = self.ball.y - yNew
-    #     self.ball.stupen = 10 - self.ball.stupen - (2*self.ball.stupen)
-    #     self.ball.uhel = math.radians(self.ball.stupen)
-    #     self.ball.y = self.ball.y - 2 * dy
-    #
-    # def reflectYupLeft(self, yNew):
-    #     dy = self.ball.y - yNew
-    #     self.ball.stupen = 10 + self.ball.stupen - (2*self.ball.stupen)
-    #     self.ball.uhel = math.radians(self.ball.stupen)
-    #     self.ball.y = self.ball.y - 2 * dy
-
     def reflectYdown(self, yNew):
         dy = self.ball.y + self.ball.size[1] - yNew
         self.ball.stupen = self.ball.stupen - (2*self.ball.stupen)
         self.ball.uhel = math.radians(self.ball.stupen)
         self.ball.y = self.ball.y - 2 * dy
-
-    # def reflectYdownLeft(self, yNew):
-    #     dy = self.ball.y + self.ball.size[1] - yNew
-    #     self.ball.stupen = 10 - self.ball.stupen - (2*self.ball.stupen)
-    #     self.ball.uhel = math.radians(self.ball.stupen)
-    #     self.ball.y = self.ball.y - 2 * dy
-    #
-    # def reflectYdownRight(self, yNew):
-    #     dy = self.ball.y + self.ball.size[1] - yNew
-    #     self.ball.stupen = 10 + self.ball.stupen - (2*self.ball.stupen)
-    #     self.ball.uhel = math.radians(self.ball.stupen)
-    #     self.ball.y = self.ball.y - 2 * dy
 
     def reflectXright(self, xNew):
         dx = self.ball.x + self.ball.size[0] - xNew
@@ -208,8 +158,7 @@ class GameLogic:
     def setBallInGame(self, ballInGame):
         self.ballInGame = ballInGame
 
-        
-    
+
 # Třída pro herní desku
 class Paddle:
     def __init__(self,size = (100, 20),x = 0, y = 0, t = 0):

@@ -31,6 +31,7 @@ class GameGraphics:
         self.horni_pravy = (self.horni_levy[0] + self.herni_velikost[0], self.horni_levy[1])
         self.spodni_levy = (self.horni_levy[0], self.herni_velikost[1])
         self.spodni_pravy = (self.horni_pravy[0], self.herni_velikost[1])
+
         # Mys
         pygame.mouse.set_visible(0)
 
@@ -58,7 +59,7 @@ class GameGraphics:
         self.ball_surface = pygame.Surface(self.game.ball.size)
 
         #ball_surface.fill(bila)
-        self.ball_surface = pygame.image.load("grafika/ball.png")#HOLI
+        #self.ball_surface = pygame.image.load("grafika/ball.png")#HOLI
 
         # Výpočty okrajů pro hraní
         self.horni_levy = ((self.velikost_okna[0] - self.herni_velikost[0]) / 2, 0)
@@ -68,17 +69,17 @@ class GameGraphics:
 
         # Surface pro herni oblast HOLI
         self.oblast_surface = pygame.Surface((self.horni_pravy[0]-self.horni_levy[0]-1,self.spodni_levy[1]- self.horni_levy[1]-1))
-        try:
-            img_url = "grafika/test.jpg"
-            img_url = ' http://webs.zcu.cz/kamery/kamera1.jpg'
-            img_url = 'http://kamera.plzen.cz/webcam.jpg?0.8093254372943193'
-            import urllib
-            import StringIO
-            f = StringIO.StringIO(urllib.urlopen(img_url).read())
-            self.oblast_surface = pygame.image.load(f, 'cam.jpg')
-        except:
-            img_url = "grafika/test.jpg"
-            self.oblast_surface = pygame.image.load(img_url)
+        # try:
+        #     img_url = "grafika/test.jpg"
+        #     img_url = ' http://webs.zcu.cz/kamery/kamera1.jpg'
+        #     img_url = 'http://kamera.plzen.cz/webcam.jpg?0.8093254372943193'
+        #     import urllib
+        #     import StringIO
+        #     f = StringIO.StringIO(urllib.urlopen(img_url).read())
+        #     self.oblast_surface = pygame.image.load(f, 'cam.jpg')
+        # except:
+        #     img_url = "grafika/test.jpg"
+        #     self.oblast_surface = pygame.image.load(img_url)
 
 
         # Surface pro vypis HOLI
@@ -115,9 +116,42 @@ class GameGraphics:
         """
         self.game.ball.x = (self.game.paddle1.x + self.game.paddle1.size[0] / 2) - (self.game.ball.size[0] / 2)
         self.game.ball.y = self.game.paddle1.y - self.game.ball.size[1]
-        self.obrazovka.blit(self.ball_surface, (self.game.ball.x, self.game.ball.y))
+        self.ball_rect_beg = pygame.Rect(self.game.ball.x,self.game.ball.y,self.game.ball.size[0],self.game.ball.size[1])
+        pygame.draw.rect(self.obrazovka, (255,0,0), self.ball_rect_beg, 0)
+        #self.obrazovka.blit(self.ball_surface, (self.game.ball.x, self.game.ball.y))
 
-    def DrawDesk(self,position, ddeska, ndeska = 0):  # !!! PREDELAT DESKU Y, JE NATVRDO !!!!!!
+    def DrawBall(self,x,y):
+        self.ball_rect = pygame.Rect(x,y,self.game.ball.size[0],self.game.ball.size[1])
+        pygame.draw.rect(self.obrazovka, (255,0,0), self.ball_rect, 0)
+        self.kolize = self.ball_rect.collidelist(self.seznam)
+        if self.kolize:
+            k = self.kolize
+            self.kolize_blok = self.seznam[k]
+            self.detect_kol()
+            self.destroy_blok(k)
+
+    def destroy_blok(self,k):
+        matrix = np.load('blockmap.npy')
+        i = 0
+        for r in range(matrix.shape[0]):
+            for s in range(matrix.shape[1]):
+                if matrix[r,s] == 1:
+                    if i == k:
+                        matrix[r,s] = 0
+                        np.save('blockmap.npy', matrix)
+                    i = i + 1
+
+
+    def detect_kol(self):
+        if self.kolize != -1:
+            return self.kolize_blok
+
+        else:
+            return -1
+
+
+
+    def DrawDesk(self,position, ddeska, ndeska = 0):
         """
     Kontrola spravneho umisteni odrazeci desky
     :param position:
@@ -173,44 +207,20 @@ class GameGraphics:
         textDeska1 = "deska1 dolni|  x:" + str(round(game.paddle1.x))
         self.vypis_surfaceDeska1 = self.pismo.render(textDeska1,  1,self.modra, self.cerna)
 
-    # def CreateList(self):
-    #     matrix = np.load('blockmap.npy')
-    #     point = self.BlockArea()
-    #     originalx = point[0]
-    #     size = self.GetBlockSize()
-    #
-    #
-    #     list = [] # Seznam souradnic bloku
-    #
-    #     for r in range(matrix.shape[0]):
-    #         for s in range(matrix.shape[1]):
-    #             if matrix[r,s]:
-    #                 blok = (point[0], point[0] + size[0], point[1], point[1] + size[1])    # (x1, x2, y1, y2)
-    #                 list.append(blok)
-    #             point = (point[0] + size[0], point[1])
-    #         point = (originalx, point[1] + size[1])
-    #     print list
-
-
-    def DrawBlocks(self):
+    def DrawBlocks(self,point,size):
         matrix = np.load('blockmap.npy')
-        point = self.BlockArea()
         originalx = point[0]
-        size = self.GetBlockSize()
 
-        # soubor = file('blockxy.config', 'w')
         self.seznam = []
-
         for r in range(matrix.shape[0]):
             for s in range(matrix.shape[1]):
 
                 if matrix[r,s]:
-                    self.obrazovka.blit(self.block_surface, (point[0], point[1]))
+                    box = pygame.Rect(point[0], point[1], size[0],size[1])
+                    pygame.draw.rect(self.obrazovka, (255,255,0), box, 5)
                     blok = (point[0], point[0] + size[0], point[1], point[1] + size[1])    # (x1, x2, y1, y2)
-                    self.seznam.append(blok)
-
+                    self.seznam.append(box)
                 point = (point[0] + size[0], point[1])
             point = (originalx, point[1] + size[1])
 
-        yaml.dump(self.seznam, open('blockxy.config', 'w'))
-        #soubor.close()
+        print len(self.seznam)

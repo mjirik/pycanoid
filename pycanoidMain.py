@@ -9,8 +9,8 @@ import pickle
 import os
 import sys
 
-from twisted.internet.task import LoopingCall
-from twisted.internet import reactor
+#from twisted.internet.task import LoopingCall
+#from twisted.internet import reactor
 
 from pycanoidGameLogic import GameLogic
 from pycanoidGraphics import GameGraphics
@@ -19,8 +19,8 @@ from pycanoidGraphics import GameGraphics
 
 from gamearea import Gamearea
 import facecontrol
-import kinectcontrol
-import kinectCallibration
+#import kinectcontrol
+#import kinectCallibration
 # version comparison
 from pkg_resources import parse_version
 
@@ -69,79 +69,87 @@ class Pycanoid:
 
 
     def game_tick(self):
-        self.click = self.game.isBallInGame()
-        self.graphics.CreateBackground()
-        
-        # Control
-        if self.parameters['control1'] == 'mouse':
-            m_pos = pygame.mouse.get_pos()    # aktuální pozice myši
-            
-        elif self.parameters['control1'] == 'face':  # Face control
-            # Loading game area parameters
-            if os.path.exists("area_params.ps"):
-                f = open("area_params.ps", 'rb')
-                area = pickle.load(f)
-                f.close()
-
-                # Setting parameters
-                self.ctrl.set_calibration_params(area)
-                # Calibrated position
-                m_pos = ((self.ctrl.get_pos()[0] * self.defaut_parameters['window_size'][0]),
-                         (self.ctrl.get_pos()[1] * self.defaut_parameters['window_size'][1]))
-            else:
-                print "Run camera calibration first"
-                raise Exception('Run camera calibration first', 'Run camera calibration first')
-                
-        elif self.parameters['control1'] == 'kinect':  # Face control
-            if os.path.exists('kinect_borders.config'):
-                f = open('kinect_borders.config','rb')
-                borders = yaml.load(f)
-                f.close()
-                
-            m_pos = self.ctrl.get_pos()
-
-        # Graphics
-        self.graphics.DrawDesk(m_pos, self.game.paddle1, 0)
-        if self.parameters['nplayers'] == 2:
-            self.graphics.DrawDesk(m_pos, self.game.paddle2, 1)
-
-        # Začátek hry
-        self.graphics.DrawBlocks()
-        if self.game.isBallInGame() == 0:
-            self.game.GenerateAngle()
-            self.graphics.DrawBallBegin()
-
-        # Akce start
-        elif self.game.isBallInGame() == 1:
-            prev_time = self.actual_time
-            self.actual_time = time.time()
-            dt = self.actual_time - prev_time
-            self.game.moveBall(dt)
+        while True:
             self.click = self.game.isBallInGame()
-            self.graphics.obrazovka.blit(self.graphics.ball_surface, (self.game.ball.x, self.game.ball.y))
-            self.graphics.DrawInformations(self.game)
+            self.graphics.CreateBackground()
 
+            # Control
+            if self.parameters['control1'] == 'mouse':
+                m_pos = pygame.mouse.get_pos()    # aktuální pozice myši
 
-        ##        # Kontrola provedených akcí
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:               # Ukončení aplikace stisknutím křížku
-                self.running = 0
-                pygame.display.quit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:  # Aktivace tlačítka na myši
-                prev_time = time.time()
+            elif self.parameters['control1'] == 'face':  # Face control
+                # Loading game area parameters
+                if os.path.exists("area_params.ps"):
+                    f = open("area_params.ps", 'rb')
+                    area = pickle.load(f)
+                    f.close()
+
+                    # Setting parameters
+                    self.ctrl.set_calibration_params(area)
+                    # Calibrated position
+                    m_pos = ((self.ctrl.get_pos()[0] * self.defaut_parameters['window_size'][0]),
+                             (self.ctrl.get_pos()[1] * self.defaut_parameters['window_size'][1]))
+                else:
+                    print "Run camera calibration first"
+                    raise Exception('Run camera calibration first', 'Run camera calibration first')
+
+            elif self.parameters['control1'] == 'kinect':  # Face control
+                if os.path.exists('kinect_borders.config'):
+                    f = open('kinect_borders.config','rb')
+                    borders = yaml.load(f)
+                    f.close()
+
+                m_pos = self.ctrl.get_pos()
+
+            # Graphics
+            self.graphics.DrawDesk(m_pos, self.game.paddle1, 0)
+            if self.parameters['nplayers'] == 2:
+                self.graphics.DrawDesk(m_pos, self.game.paddle2, 1)
+
+            # Začátek hry
+            self.graphics.DrawBlocks(self.block_area, self.block_size)
+            if self.game.isBallInGame() == 0:
+                self.game.GenerateAngle()
+                self.graphics.DrawBallBegin()
+
+            # Akce start
+            elif self.game.isBallInGame() == 1:
+                prev_time = self.actual_time
                 self.actual_time = time.time()
-                self.game.setBallInGame(1)
+                dt = self.actual_time - prev_time
+                self.game.moveBall(dt)
+                self.click = self.game.isBallInGame()
+                self.graphics.DrawBall(self.game.ball.x, self.game.ball.y)
+                self.game.setkolize(self.graphics.detect_kol())
 
-        pygame.display.update()
+                #self.graphics.DrawInformations(self.game)
+
+            ##        # Kontrola provedených akcí
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:               # Ukončení aplikace stisknutím křížku
+                    self.running = 0
+                    pygame.display.quit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:  # Aktivace tlačítka na myši
+                    prev_time = time.time()
+                    self.actual_time = time.time()
+                    self.game.setBallInGame(1)
+
+            pygame.display.update()
 
     def run(self):
 
         pygame.init()
 
         self.parameters = self.get_parameters()
-
         self.game = GameLogic(self.parameters)
+
+        self.game.generateBlocks()
+
         self.graphics = GameGraphics(self.game, (1000, 600))
+
+        self.block_area = self.graphics.BlockArea()
+        self.block_size = self.graphics.GetBlockSize()
+
         self.game.setCorners(self.graphics.prava, self.graphics.leva, self.graphics.nahore, self.graphics.dole)
 
         # Control
@@ -161,9 +169,10 @@ class Pycanoid:
 
         #print (self.graphics.spodni_levy[1] - self.graphics.horni_levy[1] - 1)
         
-        tick = LoopingCall(self.game_tick)
-        tick.start(1.0 / FPS)        
-        reactor.run()
+       # tick = LoopingCall(self.game_tick)
+        #tick.start(1.0 / FPS)
+        #reactor.run()
+        self.game_tick()
 
 if __name__ == "__main__":
     pycanoid = Pycanoid()
