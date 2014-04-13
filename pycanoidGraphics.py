@@ -69,17 +69,17 @@ class GameGraphics:
 
         # Surface pro herni oblast HOLI
         self.oblast_surface = pygame.Surface((self.horni_pravy[0]-self.horni_levy[0]-1,self.spodni_levy[1]- self.horni_levy[1]-1))
-        # try:
-        #     img_url = "grafika/test.jpg"
-        #     img_url = ' http://webs.zcu.cz/kamery/kamera1.jpg'
-        #     img_url = 'http://kamera.plzen.cz/webcam.jpg?0.8093254372943193'
-        #     import urllib
-        #     import StringIO
-        #     f = StringIO.StringIO(urllib.urlopen(img_url).read())
-        #     self.oblast_surface = pygame.image.load(f, 'cam.jpg')
-        # except:
-        #     img_url = "grafika/test.jpg"
-        #     self.oblast_surface = pygame.image.load(img_url)
+        try:
+            img_url = "grafika/test1.jpg"
+            # img_url = ' http://webs.zcu.cz/kamery/kamera1.jpg'
+            # img_url = 'http://kamera.plzen.cz/webcam.jpg?0.8093254372943193'
+            # import urllib
+            # import StringIO
+            # f = StringIO.StringIO(urllib.urlopen(img_url).read())
+            self.oblast_surface = pygame.image.load(f, 'cam.jpg')
+        except:
+            img_url = "grafika/test1.jpg"
+            self.oblast_surface = pygame.image.load(img_url)
 
 
         # Surface pro vypis HOLI
