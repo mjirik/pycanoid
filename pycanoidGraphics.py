@@ -117,14 +117,14 @@ class GameGraphics:
         self.game.ball.x = (self.game.paddle1.x + self.game.paddle1.size[0] / 2) - (self.game.ball.size[0] / 2)
         self.game.ball.y = self.game.paddle1.y - self.game.ball.size[1]
         self.ball_rect_beg = pygame.Rect(self.game.ball.x,self.game.ball.y,self.game.ball.size[0],self.game.ball.size[1])
-        pygame.draw.rect(self.obrazovka, (255,0,0), self.ball_rect_beg, 0)
+        pygame.draw.rect(self.obrazovka, (255,0,0), self.ball_rect_beg, 3)
         #self.obrazovka.blit(self.ball_surface, (self.game.ball.x, self.game.ball.y))
 
     def DrawBall(self,x,y):
         self.ball_rect = pygame.Rect(x,y,self.game.ball.size[0],self.game.ball.size[1])
-        pygame.draw.rect(self.obrazovka, (255,0,0), self.ball_rect, 0)
+        pygame.draw.rect(self.obrazovka, (255,0,0), self.ball_rect, 3)
         self.kolize = self.ball_rect.collidelist(self.seznam)
-        if self.kolize:
+        if self.kolize != -1:
             k = self.kolize
             self.kolize_blok = self.seznam[k]
             self.detect_kol()
@@ -141,6 +141,11 @@ class GameGraphics:
                         np.save('blockmap.npy', matrix)
                     i = i + 1
 
+    def empty_matrix(self):
+        if self.num_blocks == 0:
+            return 1
+        else:
+            return 0
 
     def detect_kol(self):
         if self.kolize != -1:
@@ -148,7 +153,6 @@ class GameGraphics:
 
         else:
             return -1
-
 
 
     def DrawDesk(self,position, ddeska, ndeska = 0):
@@ -159,9 +163,9 @@ class GameGraphics:
         ndeska: 0 - dole, 1 - nahore
     """
         if ndeska == 0:
-            deskay = self.herni_velikost[1] - ddeska.size[1]-50
+            deskay = self.herni_velikost[1] - ddeska.size[1]-10
         else:
-            deskay = 50 # herni_velikost[1] - ddeska.size[1] - 30
+            deskay = 10 # herni_velikost[1] - ddeska.size[1] - 30
 
         # podminka pro herni oblast
         if (position[0] - ddeska.size[0] / 2 >= self.spodni_levy[0]) and (position[0] + ddeska.size[0] / 2 <= self.spodni_pravy[0]):
@@ -217,10 +221,9 @@ class GameGraphics:
 
                 if matrix[r,s]:
                     box = pygame.Rect(point[0], point[1], size[0],size[1])
-                    pygame.draw.rect(self.obrazovka, (255,255,0), box, 5)
+                    pygame.draw.rect(self.obrazovka, (255,255,0), box, 3)
                     blok = (point[0], point[0] + size[0], point[1], point[1] + size[1])    # (x1, x2, y1, y2)
                     self.seznam.append(box)
                 point = (point[0] + size[0], point[1])
             point = (originalx, point[1] + size[1])
-
-        print len(self.seznam)
+        self.num_blocks = len(self.seznam)

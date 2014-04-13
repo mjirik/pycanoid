@@ -121,6 +121,8 @@ class Pycanoid:
                 self.click = self.game.isBallInGame()
                 self.graphics.DrawBall(self.game.ball.x, self.game.ball.y)
                 self.game.setkolize(self.graphics.detect_kol())
+                self.game.set_allgone(self.graphics.empty_matrix())
+
 
                 #self.graphics.DrawInformations(self.game)
 
