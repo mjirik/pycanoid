@@ -15,12 +15,12 @@ import sys
 from pycanoidGameLogic import GameLogic
 from pycanoidGraphics import GameGraphics
 
-
-
 from gamearea import Gamearea
 import facecontrol
 #import kinectcontrol
 #import kinectCallibration
+
+
 # version comparison
 from pkg_resources import parse_version
 
@@ -159,8 +159,8 @@ class Pycanoid:
             self.ctrl = facecontrol.Facecontrol()
         if self.parameters["control1"] == "kinect":
             self.ctrl = kinectcontrol.KinectControl()           
-        else:
-            self.ctrl = None
+        # else:
+        #     self.ctrl = None
         
         # Nastaveni FPS
         FPS = 60
