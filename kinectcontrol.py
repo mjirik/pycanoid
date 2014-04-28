@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Mar  5 12:57:37 2014
-
-@author: tstation
-"""
 import json
 import twisted
 from twisted.internet import reactor
 import autobahn
+#import os
+#import yaml
+#import pickle
 from autobahn.websocket import WebSocketClientFactory
 from autobahn.websocket import WebSocketClientProtocol
 from autobahn.websocket import connectWS
@@ -21,16 +19,19 @@ class KinectControl():
     
     def __init__(self, host=host, save_data=None, loop_time=LOOP_TIME, reactor=reactor): 
         if save_data is None:
-            save_data=self.save_data
+            save_data=self.save_data            
         factory = ClientFactory(host, save_data)
         factory.protocol = KinectClient
         connectWS(factory)
         self.reactor=reactor
         self.data = [{'RightHand':{"X":0, "Y":0}, 'RightShoulder':{"X":0, "Y":0}}]
         self.kk = None
+        self.kin_parameter = None
+ #       self.loaddata
        
-      
-  
+#    def loaddata(self):
+
+        
     def save_data(self, data):
         self.data = data
     
@@ -41,8 +42,6 @@ class KinectControl():
             try:
                 x = (everything[0]['RightHand']['X']) - (everything[0]['RightShoulder']['X'])
                 y = (everything[0]['RightHand']['Y']) - (everything[0]['RightShoulder']['Y'])
-                #print everything[0]['RightHand']['X']
-                #print everything[0]['RightShoulder']['X']
                 pos = (x,y)
                 return pos
             except Exception as e:
@@ -54,10 +53,49 @@ class KinectControl():
     def get_pos(self):
         everything = self.data
         if len(everything) > 0:
-            position = (everything[0]['RightHand']['X'], everything[0]['RightHand']['Y'])
+            try:
+                position = (everything[0]['RightHand']['X'], everything[0]['RightHand']['Y'])
+                return position
+            except Exception as e:
+                print e
+                print self.data
+                return (0, 0)
+
+        else:
+            return (0, 0)
+            
+    def set_cal_parameters(self, parameters):
+        self.kin_parameter = parameters
+        print parameters            
+            
+    def get_cal_pos(self):
+        position = self.get_pos
+        
+        if self.kin_parameter == None:
             return position
         else:
-            return (0,0)
+            borders = self.kin_parameter
+        
+            leva = borders[1]
+            prava = borders[2]
+            up = borders[3]
+            down = borders[0]
+            
+            delka = prava - leva
+        
+            if position[0] >= prava:
+                new_pos = (1, position[1])
+                print new_pos
+                return new_pos
+            elif position[0] <= leva:
+                new_pos = (0, position[1])
+                print new_pos
+                return new_pos
+            elif position[0] > leva and position[0] < prava:
+                pos_delka = prava - position[0]
+                new_pos = (float(pos_delka)/float(delka), position[1])
+                print new_pos
+                return new_pos
         
     def get_people(self):
         everything = self.data
@@ -100,7 +138,7 @@ class ClientFactory(autobahn.websocket.WebSocketClientFactory):
 
 
 def print_pos_repeated(kcontrol, loop_time = 1):
-    pos = kcontrol.get_len()
+    pos = kcontrol.get_cal_pos()
     print pos
     reactor.callLater(loop_time, print_pos_repeated, kcontrol)
 

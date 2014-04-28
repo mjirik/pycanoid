@@ -1,4 +1,4 @@
-control1: kinect
+control1: mouse
 host: true
 ip_server: 192.168.1.5
 nplayers: 2

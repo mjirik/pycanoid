@@ -3,21 +3,22 @@
 
 import pygame
 import time
-import math
-import random
-import pickle
+#import math
+#import random
+#import pickle
 import os
 import sys
+import yaml
 
-#from twisted.internet.task import LoopingCall
-#from twisted.internet import reactor
+from twisted.internet.task import LoopingCall
+from twisted.internet import reactor
 
 from pycanoidGameLogic import GameLogic
 from pycanoidGraphics import GameGraphics
 
 from gamearea import Gamearea
 import facecontrol
-#import kinectcontrol
+import kinectcontrol
 #import kinectCallibration
 
 
@@ -47,6 +48,16 @@ class Pycanoid:
         """
         Funkce obstará základní parametry
         """
+        kinect_file = 'kinect_borders.config'
+        if os.path.isfile(kinect_file):
+            stream = file(kinect_file,'rb')    # 'document.yaml' contains a single YAML document. # file() delal problemy na win 8 HOLI
+            if parse_version(sys.version) < parse_version('3.0'):
+            #           python 27
+                self.kinect_parameters = yaml.load(stream)
+            else: # python 3
+                self.kinect_parameters = yaml.load(stream)
+        
+        
         config_file = 'pycanoid.config'
         if os.path.isfile(config_file):
             stream = file(config_file,
@@ -69,7 +80,7 @@ class Pycanoid:
 
 
     def game_tick(self):
-        while True:
+        #while True:
             self.click = self.game.isBallInGame()
             self.graphics.CreateBackground()
 
@@ -94,10 +105,7 @@ class Pycanoid:
                     raise Exception('Run camera calibration first', 'Run camera calibration first')
 
             elif self.parameters['control1'] == 'kinect':  # Face control
-                if os.path.exists('kinect_borders.config'):
-                    f = open('kinect_borders.config','rb')
-                    borders = yaml.load(f)
-                    f.close()
+                        
 
                 m_pos = self.ctrl.get_pos()
 
@@ -158,7 +166,8 @@ class Pycanoid:
         if self.parameters['control1'] == 'face':
             self.ctrl = facecontrol.Facecontrol()
         if self.parameters["control1"] == "kinect":
-            self.ctrl = kinectcontrol.KinectControl()           
+            self.ctrl = kinectcontrol.KinectControl()
+            self.ctrl.set_cal_parameters(self.kinect_parameters)
         # else:
         #     self.ctrl = None
         
@@ -171,10 +180,10 @@ class Pycanoid:
 
         #print (self.graphics.spodni_levy[1] - self.graphics.horni_levy[1] - 1)
         
-       # tick = LoopingCall(self.game_tick)
-        #tick.start(1.0 / FPS)
-        #reactor.run()
-        self.game_tick()
+        tick = LoopingCall(self.game_tick)
+        tick.start(1.0 / FPS)
+        reactor.run()
+        #self.game_tick()
 
 if __name__ == "__main__":
     pycanoid = Pycanoid()
