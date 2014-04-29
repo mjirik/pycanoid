@@ -128,6 +128,7 @@ class GameLogic:
             self.player.SaveData()
             self.player.Respawn()
             self.generateBlocks()
+            self.gone = 0
 
 
 

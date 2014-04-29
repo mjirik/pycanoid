@@ -5,7 +5,7 @@ import pygame
 import time
 #import math
 #import random
-#import pickle
+import pickle
 import os
 import sys
 import yaml
@@ -80,6 +80,8 @@ class Pycanoid:
 
 
     def game_tick(self):
+
+        
         #while True:
             self.click = self.game.isBallInGame()
             self.graphics.CreateBackground()
@@ -105,10 +107,12 @@ class Pycanoid:
                     raise Exception('Run camera calibration first', 'Run camera calibration first')
 
             elif self.parameters['control1'] == 'kinect':  # Face control
-                        
-
-                m_pos = self.ctrl.get_pos()
-
+                
+                calibrated_pos = self.ctrl.get_cal_pos(self.ctrl.get_pos())     
+                m_pos = (calibrated_pos[0]*1000
+                ,calibrated_pos[1]*600)
+                #m_pos = self.ctrl.get_pos()
+                
             # Graphics
             self.graphics.DrawDesk(m_pos, self.game.paddle1, 0)
             if self.parameters['nplayers'] == 2:
@@ -133,8 +137,12 @@ class Pycanoid:
 
 
                 #self.graphics.DrawInformations(self.game)
-
             ##        # Kontrola provedených akcí
+            if m_pos[1] < self.kinect_parameters['bottom']:
+                if self.game.ballInGame == 0:
+                    prev_time = time.time()
+                    self.push()
+                
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:               # Ukončení aplikace stisknutím křížku
                     self.running = 0
@@ -145,7 +153,12 @@ class Pycanoid:
                     self.game.setBallInGame(1)
 
             pygame.display.update()
-
+            
+    def push(self):      
+        self.actual_time = time.time()
+        self.game.setBallInGame(1)
+        
+        
     def run(self):
 
         pygame.init()
@@ -168,6 +181,7 @@ class Pycanoid:
         if self.parameters["control1"] == "kinect":
             self.ctrl = kinectcontrol.KinectControl()
             self.ctrl.set_cal_parameters(self.kinect_parameters)
+
         # else:
         #     self.ctrl = None
         

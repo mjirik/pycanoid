@@ -68,7 +68,7 @@ class GameGraphics:
         self.spodni_pravy = (self.horni_pravy[0], self.herni_velikost[1])
 
         # Surface pro herni oblast HOLI
-        self.oblast_surface = pygame.Surface((self.horni_pravy[0]-self.horni_levy[0]-1,self.spodni_levy[1]- self.horni_levy[1]-1))
+        self.oblast_surface = pygame.Surface((self.horni_pravy[0]-self.horni_levy[0]-1,self.spodni_levy[1]- self.horni_levy[1]-1))      
         try:
             img_url = "grafika/test1.jpg"
             # img_url = ' http://webs.zcu.cz/kamery/kamera1.jpg'

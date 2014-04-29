@@ -68,34 +68,34 @@ class KinectControl():
         self.kin_parameter = parameters
         print parameters            
             
-    def get_cal_pos(self):
-        position = self.get_pos
+    def get_cal_pos(self, position):
+        #position = self.get_pos
         
         if self.kin_parameter == None:
             return position
         else:
             borders = self.kin_parameter
         
-            leva = borders[1]
-            prava = borders[2]
-            up = borders[3]
-            down = borders[0]
+            leva = borders['left']
+            prava = borders['right']
+            up = borders['top']
+            down = borders['bottom']
             
             delka = prava - leva
-        
+            vyska = down - up
+            
             if position[0] >= prava:
                 new_pos = (1, position[1])
-                print new_pos
                 return new_pos
             elif position[0] <= leva:
                 new_pos = (0, position[1])
-                print new_pos
                 return new_pos
             elif position[0] > leva and position[0] < prava:
                 pos_delka = prava - position[0]
-                new_pos = (float(pos_delka)/float(delka), position[1])
-                print new_pos
+                pos_vyska = down - position[1]
+                new_pos = (1 -((float(pos_delka)/float(delka))), 1 -((float(pos_vyska)/float(vyska))))
                 return new_pos
+
         
     def get_people(self):
         everything = self.data
