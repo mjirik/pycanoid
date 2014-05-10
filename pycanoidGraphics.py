@@ -82,11 +82,14 @@ class GameGraphics:
             self.oblast_surface = pygame.image.load(img_url)
 
 
-        # Surface pro vypis HOLI
+        # Surface pro vypis
         self.vypis_surfaceBall = pygame.Surface((300,200))
         self.vypis_surfaceBall.fill(self.cerna)
         self.vypis_surfaceDeska1 = pygame.Surface((200,200))
         self.vypis_surfaceDeska1.fill(self.cerna)
+        self.vypis_surfaceVzdal = pygame.Surface((400,200))
+        self.vypis_surfaceVzdal.fill(self.cerna)
+        
 
         self.prava = self.horni_pravy[0]  # X souřadnice pro pravou herní plochu
         self.leva = self.horni_levy[0]    # X souřadnice pro levou herní plochu
@@ -109,6 +112,8 @@ class GameGraphics:
         self.obrazovka.blit(self.oblast_surface, (self.horni_levy[0]+1, self.horni_levy[1]+1))
         self.obrazovka.blit(self.vypis_surfaceBall, (10, self.dole+10))
         self.obrazovka.blit(self.vypis_surfaceDeska1, (400, self.dole+10))
+        self.obrazovka.blit(self.vypis_surfaceVzdal, (600, self.dole+10))
+        
 
     def DrawBallBegin(self):
         """
@@ -142,7 +147,7 @@ class GameGraphics:
                     i = i + 1
 
     def empty_matrix(self):
-        if self.num_blocks == 0:
+        if self.num_blocks < 1:
             return 1
         else:
             return 0
@@ -206,11 +211,13 @@ class GameGraphics:
         """
     Vykresluje ladící výpisy přímo do hry
         """
-        text = "ball| x:" + str(round(game.ball.x)) + "| y:" + str(round(game.ball.y))
-        self.vypis_surfaceBall = self.pismo.render(text,  1, self.modra, self.cerna)
-        textDeska1 = "deska1 dolni|  x:" + str(round(game.paddle1.x))
-        self.vypis_surfaceDeska1 = self.pismo.render(textDeska1,  1,self.modra, self.cerna)
-
+        text = "Nick: " + game.player.name
+        self.vypis_surfaceBall = self.pismo.render(text,  1, self.bila, self.cerna)
+        textDeska1 = "Bloky: " + str(self.num_blocks)
+        self.vypis_surfaceDeska1 = self.pismo.render(textDeska1,  1,self.bila, self.cerna)
+        textvzdal = "Vzdalenost:" + str(self.game.player.vzdalenost)
+        self.vypis_surfaceVzdal = self.pismo.render(textvzdal, 1, self.bila, self.cerna)        
+        
     def DrawBlocks(self,point,size):
         matrix = np.load('blockmap.npy')
         originalx = point[0]

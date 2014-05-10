@@ -31,7 +31,10 @@ class GameLogic:
         self.kolize_blok = blok
 
     def set_allgone(self, gone):
-        self.gone = gone
+        if gone == 1:
+            self.gone = True
+        else:
+            self.gone = False
 
     def generateBlocks(self):
         """
@@ -40,6 +43,8 @@ class GameLogic:
         matrix = np.random.randint(2, size=(10, 10))
         np.save('blockmap', matrix)
         self.player.GenerateName()
+        self.player.numberOfblocks = np.count_nonzero(matrix)
+        #self.set_allgone(0)
 
     def setCorners(self, prava, leva, nahore, dole):
         self.prava = prava  # X souřadnice pro pravou herní plochu
@@ -122,13 +127,13 @@ class GameLogic:
             self.player.StopTime()
             self.ballInGame = 0
 
-        if self.gone == 1:
+        if self.gone == True:
+            self.gone = False
             self.player.StopTime()
             self.ballInGame = 0
             self.player.SaveData()
             self.player.Respawn()
             self.generateBlocks()
-            self.gone = 0
 
 
 
@@ -191,9 +196,11 @@ class Player:
     def __init__(self):
         self.name = None
         self.points = 0
-        self.takes = 0
+        self.takes = 1
+        self.numberOfblocks = 0
         self.time = 0
         self.cistycas = 0
+        self.vzdalenost = 0
         self.TimeListStart = []
         self.TimeListStop = []
 
@@ -203,10 +210,12 @@ class Player:
         print 'New player: ', name
 
     def Respawn(self):
+        self.numberOfblocks = 0
         self.points = 0
-        self.takes = 0
+        self.takes = 1
         self.time = 0
         self.cistycas = 0
+        self.vzdalenost = 0
         self.TimeListStart = []
         self.TimeListStop = []
 
@@ -219,6 +228,7 @@ class Player:
         self.TimeListStop.append(self.stop)
 
     def Count(self):
+        "Cas"
         mezicas = 0
         for i in range(len(self.TimeListStart)):
             start = self.TimeListStart[i]
@@ -226,9 +236,15 @@ class Player:
             mezicas = mezicas + (stop - start)
         self.cistycas = round(mezicas, 2)
 
+        "Body"
+        prepoints = ((self.numberOfblocks/self.takes)/self.cistycas)*1000
+        self.points = round(prepoints,0)
+        
+
     def SaveData(self):
         self.Count()
-        data = {'nick': self.name, 'takes': self.takes, 'points': self.points, 'time': self.cistycas}
+        print self.vzdalenost
+        data = {'nick': self.name, 'number of blocks': self.numberOfblocks, 'takes': self.takes, 'time': self.cistycas, 'points': self.points,'vzdalenost': self.vzdalenost}
         soubor = file('score.config', 'a+')
         yaml.dump(data, soubor)
 

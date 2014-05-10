@@ -88,7 +88,7 @@ class Pycanoid:
 
             # Control
             if self.parameters['control1'] == 'mouse':
-                m_pos = pygame.mouse.get_pos()    # aktuální pozice myši
+                m_pos = pygame.mouse.get_pos()    # aktuální pozice mysi
 
             elif self.parameters['control1'] == 'face':  # Face control
                 # Loading game area parameters
@@ -112,17 +112,25 @@ class Pycanoid:
                 m_pos = (calibrated_pos[0]*1000
                 ,calibrated_pos[1]*600)
                 #m_pos = self.ctrl.get_pos()
-                
+            
+            
             # Graphics
             self.graphics.DrawDesk(m_pos, self.game.paddle1, 0)
             if self.parameters['nplayers'] == 2:
                 self.graphics.DrawDesk(m_pos, self.game.paddle2, 1)
+                
+            self.aktualni_bod = self.game.paddle1.x
 
+            if self.game.gone == True:
+                self.vzdalenost = 0
+            
             # Začátek hry
             self.graphics.DrawBlocks(self.block_area, self.block_size)
             if self.game.isBallInGame() == 0:
                 self.game.GenerateAngle()
                 self.graphics.DrawBallBegin()
+                self.game.set_allgone(self.graphics.empty_matrix())
+                
 
             # Akce start
             elif self.game.isBallInGame() == 1:
@@ -134,24 +142,32 @@ class Pycanoid:
                 self.graphics.DrawBall(self.game.ball.x, self.game.ball.y)
                 self.game.setkolize(self.graphics.detect_kol())
                 self.game.set_allgone(self.graphics.empty_matrix())
+                self.vzdalenost += abs(self.aktualni_bod - self.stary_bod)
+                self.game.player.vzdalenost = self.vzdalenost
+                self.stary_bod = self.aktualni_bod
 
 
-                #self.graphics.DrawInformations(self.game)
+                self.graphics.DrawInformations(self.game)
+                
             ##        # Kontrola provedených akcí
-            if m_pos[1] < self.kinect_parameters['bottom']:
-                if self.game.ballInGame == 0:
-                    prev_time = time.time()
-                    self.push()
+            if self.parameters["control1"] == "kinect":
+                if m_pos[1] < self.kinect_parameters['bottom']:
+                    if self.game.ballInGame == 0:
+                        prev_time = time.time()
+                        self.push()
                 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:               # Ukončení aplikace stisknutím křížku
                     self.running = 0
                     pygame.display.quit()
                 elif event.type == pygame.MOUSEBUTTONDOWN:  # Aktivace tlačítka na myši
-                    prev_time = time.time()
-                    self.actual_time = time.time()
-                    self.game.setBallInGame(1)
-
+                    #prev_time = time.time()
+                    #self.actual_time = time.time()
+                    if self.game.ballInGame == 0:
+                        self.game.setBallInGame(1)
+                        prev_time = time.time()
+                        self.actual_time = time.time()
+            
             pygame.display.update()
             
     def push(self):      
@@ -160,16 +176,16 @@ class Pycanoid:
         
         
     def run(self):
-
         pygame.init()
-
+        self.vzdalenost = 0
+        
         self.parameters = self.get_parameters()
         self.game = GameLogic(self.parameters)
 
         self.game.generateBlocks()
 
         self.graphics = GameGraphics(self.game, (1000, 600))
-
+        self.stary_bod = self.graphics.velikost_okna[0]/2
         self.block_area = self.graphics.BlockArea()
         self.block_size = self.graphics.GetBlockSize()
 
